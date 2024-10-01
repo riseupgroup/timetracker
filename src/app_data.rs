@@ -35,12 +35,12 @@ impl AppData {
             let private_key =
                 std::env::var("PRIVATE_KEY").unwrap_or_else(|_| String::from("private.pem"));
 
-            let server_key = match std::fs::read(&server_key) {
+            let server_key = match std::fs::read(&*shellexpand::tilde(&server_key)) {
                 Ok(x) => x,
                 Err(err) => panic!("Unable to open {server_key:?}: {err:?}"),
             };
 
-            let private_key = match std::fs::read(&private_key) {
+            let private_key = match std::fs::read(&*shellexpand::tilde(&private_key)) {
                 Ok(x) => x,
                 Err(err) => panic!("Unable to open {private_key:?}: {err:?}"),
             };
