@@ -4,10 +4,11 @@ version = "0.1.0"
 edition = "2021"
 
 [workspace]
-members = [".", "migration"]
+members = ["migration"]
+exclude = ["svelte-path-finder"]
 
 [dependencies]
-svelte-path-matcher = { git = "https://github.com/riseupgroup/svelte-path-matcher.git" }
+svelte-path-finder = { path = "./svelte-path-finder" }
 authentication-service = { git = "https://github.com/riseupgroup/authentication-service.git" }
 actix-web = "4.3.1"
 actix-session = { version = "0.7.2", features = ["cookie-session"] }
@@ -20,6 +21,7 @@ lazy_static = "1.5.0"
 dotenv = "0.15.0"
 env_logger = "0.11.5"
 log = "0.4.22"
+serde_json = "1.0.127"
 
 [build-dependencies]
 static-files = "0.2.1"
