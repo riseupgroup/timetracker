@@ -39,6 +39,10 @@ async fn main() -> std::io::Result<()> {
         AppData::init().await;
     }
 
+    let port = std::env::var("PORT")
+        .map(|x| x.parse().expect("Invalid port"))
+        .unwrap_or_else(|_| 80);
+
     HttpServer::new(move || {
         App::new()
             .wrap(actix_web::middleware::Logger::default())
@@ -52,7 +56,7 @@ async fn main() -> std::io::Result<()> {
             .configure(user::init)
             .configure(frontend::init)
     })
-    .bind(("0.0.0.0", 8000))?
+    .bind(("0.0.0.0", port))?
     .run()
     .await
 }

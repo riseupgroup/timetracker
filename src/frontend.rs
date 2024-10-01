@@ -1,7 +1,14 @@
 use {
     crate::user::SessionUser,
     actix_session::Session,
-    actix_web::{get, http::{header::{self, HeaderValue}, Method, StatusCode}, web, Error, HttpRequest, HttpResponse, HttpResponseBuilder, Route},
+    actix_web::{
+        get,
+        http::{
+            header::{self, HeaderValue},
+            Method, StatusCode,
+        },
+        web, Error, HttpRequest, HttpResponse, HttpResponseBuilder, Route,
+    },
 };
 
 const PATHS: svelte_path_finder::SveltePathFinder<'static> =
@@ -16,7 +23,9 @@ lazy_static::lazy_static! {
 
 fn set_cache_header(path: &str, mut response: HttpResponse) -> HttpResponse {
     if path.starts_with("_app/immutable") {
-        response.headers_mut().append(header::CACHE_CONTROL, CACHE_CONTROL_HEADER.clone());
+        response
+            .headers_mut()
+            .append(header::CACHE_CONTROL, CACHE_CONTROL_HEADER.clone());
     }
     response
 }
