@@ -1,1 +1,1 @@
-sea-orm-cli generate entities -o generated_entities
+sea-orm-cli generate entity -o generated_entities

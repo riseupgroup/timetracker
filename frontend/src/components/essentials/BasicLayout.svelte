@@ -7,7 +7,7 @@
     import Footer from "../../components/essentials/Footer.svelte";
     import { writable, type Writable } from "svelte/store";
     import { setContext } from "svelte";
-    
+
     let content: Writable<HTMLDivElement | null> = writable(null);
     setContext("content", content);
 </script>

@@ -23,8 +23,27 @@ export default [
         files: ["**/*.svelte"],
         languageOptions: {
             parserOptions: {
-                parser: ts.parser
+                parser: ts.parser,
+                svelteFeatures: {
+                    experimentalGenerics: true
+                }
             }
+        }
+    },
+    {
+        rules: {
+            "@typescript-eslint/no-unused-vars": [
+                "error",
+                {
+                    args: "all",
+                    argsIgnorePattern: "^_",
+                    caughtErrors: "all",
+                    caughtErrorsIgnorePattern: "^_",
+                    destructuredArrayIgnorePattern: "^_",
+                    varsIgnorePattern: "^_",
+                    ignoreRestSiblings: true
+                }
+            ]
         }
     },
     {

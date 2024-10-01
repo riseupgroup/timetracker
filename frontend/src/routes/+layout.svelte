@@ -15,6 +15,7 @@
             return finder;
         } else {
             alert(await res.text());
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             return null as any;
         }
     }
@@ -27,7 +28,7 @@
             let user = await window.getUser();
             if (user == null) {
                 show = false;
-                goto("/login?path=/" + path, {replaceState: true});
+                goto("/login?path=/" + path, { replaceState: true });
                 return;
             }
         }
