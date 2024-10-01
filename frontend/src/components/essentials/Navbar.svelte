@@ -12,7 +12,7 @@
         DropdownDivider
     } from "flowbite-svelte";
     import { ChevronDownOutline } from "flowbite-svelte-icons";
-    import type { User } from "../../app.d.ts";
+    import type { User } from "../../app.ts";
     import { onMount } from "svelte";
     import { page } from "$app/stores";
     import { goto } from "$app/navigation";
@@ -45,15 +45,15 @@
 </script>
 
 <Navbar color="dark" class="border-b border-gray-200 dark:border-gray-600">
-    <NavBrand href="/" class="order-0 grow">
+    <NavBrand href="/" class="order-0 flex-grow">
         <img
             src="https://github.com/riseupgroup.png"
             class="me-3 h-6 w-6 sm:h-9 sm:w-9"
             alt="RiseUpGroup Logo"
         />
-        <span class="self-center whitespace-nowrap text-xl font-semibold dark:text-white"
-            >Actix-Svelte Example</span
-        >
+        <span class="self-center whitespace-nowrap text-xl font-semibold dark:text-white">
+            Actix-Svelte <span class="hidden sm:inline-block">Example</span>
+        </span>
     </NavBrand>
     <NavUl class="order-2 md:order-1" {activeUrl}>
         <NavLi href="/">Home</NavLi>

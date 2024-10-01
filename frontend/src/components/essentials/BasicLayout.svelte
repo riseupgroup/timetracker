@@ -5,13 +5,18 @@
 
     import Navbar from "../../components/essentials/Navbar.svelte";
     import Footer from "../../components/essentials/Footer.svelte";
+    import { writable, type Writable } from "svelte/store";
+    import { setContext } from "svelte";
+    
+    let content: Writable<HTMLDivElement | null> = writable(null);
+    setContext("content", content);
 </script>
 
 <div class="page-container bg-white text-gray-600 dark:bg-gray-900 dark:text-gray-400">
     {#if navbar}
         <Navbar />
     {/if}
-    <div class="content-container">
+    <div class="content-container" bind:this={$content}>
         <main
             class="page-content container mx-auto px-4 pt-3 md:pt-6"
             style={hide_footer ? "flex-basis: 100%" : ""}
