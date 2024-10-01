@@ -4,6 +4,7 @@ use actix_web::{cookie::SameSite, App, HttpServer};
 mod app_data;
 mod error;
 mod frontend;
+mod update_value;
 mod user;
 
 pub(crate) use app_data::AppData;
