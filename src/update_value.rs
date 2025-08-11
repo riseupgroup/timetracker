@@ -8,7 +8,7 @@ use {
     std::{fmt, marker::PhantomData, ops::Deref},
 };
 
-#[derive(Debug, Clone, Copy, Default, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, Default, Serialize)]
 pub enum UpdateValue<T> {
     Set(T),
     #[default]
@@ -53,6 +53,69 @@ impl<T: Into<Value>> From<UpdateValue<T>> for ActiveValue<T> {
             UpdateValue::Set(x) => ActiveValue::Set(x),
             UpdateValue::Unset => ActiveValue::NotSet,
         }
+    }
+}
+
+struct UpdateValueVisitor<T> {
+    marker: PhantomData<T>,
+}
+
+impl<'de, T> Visitor<'de> for UpdateValueVisitor<T>
+where
+    T: Deserialize<'de>,
+{
+    type Value = UpdateValue<T>;
+
+    fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str("an UpdateValue")
+    }
+
+    #[inline]
+    fn visit_unit<E>(self) -> Result<Self::Value, E>
+    where
+        E: Error,
+    {
+        Ok(UpdateValue::Unset)
+    }
+
+    #[inline]
+    fn visit_none<E>(self) -> Result<Self::Value, E>
+    where
+        E: Error,
+    {
+        Ok(UpdateValue::Unset)
+    }
+
+    #[inline]
+    fn visit_some<D>(self, deserializer: D) -> Result<Self::Value, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        T::deserialize(deserializer).map(UpdateValue::Set)
+    }
+
+    fn __private_visit_untagged_option<D>(self, deserializer: D) -> Result<Self::Value, ()>
+    where
+        D: Deserializer<'de>,
+    {
+        Ok(match T::deserialize(deserializer) {
+            Ok(x) => UpdateValue::Set(x),
+            Err(_) => UpdateValue::Unset,
+        })
+    }
+}
+
+impl<'de, T> Deserialize<'de> for UpdateValue<T>
+where
+    T: Deserialize<'de> + fmt::Debug,
+{
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        deserializer.deserialize_option(UpdateValueVisitor::<T> {
+            marker: PhantomData,
+        })
     }
 }
 
@@ -118,7 +181,7 @@ where
     type Value = UpdateOption<T>;
 
     fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        formatter.write_str("an UpdateValue")
+        formatter.write_str("an UpdateOption")
     }
 
     #[inline]
