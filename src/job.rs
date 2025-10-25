@@ -15,6 +15,7 @@ use {
         Error,
     },
     chrono::Utc,
+    chrono_tz::Tz,
     sea_orm::{
         ActiveModelTrait, ActiveValue, ColumnTrait, EntityTrait, IntoActiveModel, ModelTrait,
         QueryFilter, Set, TransactionTrait,
@@ -61,7 +62,11 @@ impl job::Model {
         Ok(job)
     }
 
-    pub async fn get_extended(job: u32, user: &SessionUser) -> Result<ExtendedJob, Error> {
+    pub async fn get_extended(
+        job: u32,
+        user: &SessionUser,
+        timezone: Tz,
+    ) -> Result<ExtendedJob, Error> {
         let (job, active_tracker) = Job::find_by_id(job)
             .find_also_related(Tracker)
             .one(&AppData::get().conn)
@@ -72,11 +77,18 @@ impl job::Model {
             return Err(ErrorForbidden("Forbidden"));
         }
 
-        let active_tracker = active_tracker.map(|tracker| ExtendedTracker {
-            tracker,
-            time_worked: None,
-            is_active: true,
-        });
+        let active_tracker = match active_tracker {
+            Some(tracker) => {
+                let end = Utc::now().with_timezone(&timezone).date_naive();
+                let time_worked = tracker.calculate_time_worked(timezone, Some(end)).await?;
+                Some(ExtendedTracker {
+                    tracker,
+                    time_worked: Some(time_worked),
+                    is_active: true,
+                })
+            }
+            None => None,
+        };
 
         Ok(ExtendedJob {
             job,

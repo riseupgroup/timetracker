@@ -2,6 +2,7 @@ use {
     crate::{
         entities::job,
         job::{NewJob, UpdateJob},
+        tracker::Timezone,
         user::SessionUser,
     },
     actix_session::Session,
@@ -26,9 +27,13 @@ async fn create_many(
 }
 
 #[get("/api/jobs/{id}")]
-async fn get(session: Session, job: web::Path<u32>) -> Result<impl Responder, Error> {
+async fn get(
+    session: Session,
+    job: web::Path<u32>,
+    params: web::Query<Timezone>,
+) -> Result<impl Responder, Error> {
     let user = SessionUser::try_from(&session)?;
-    let job = job::Model::get_extended(job.into_inner(), &user).await?;
+    let job = job::Model::get_extended(job.into_inner(), &user, params.timezone).await?;
     Ok(HttpResponse::Ok().json(job))
 }
 
