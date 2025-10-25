@@ -18,3 +18,7 @@ auth_server.pem
 # OS
 .DS_Store
 Thumbs.db
+
+# DB
+db_data
+db_config

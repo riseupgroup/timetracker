@@ -89,6 +89,7 @@ mod debug {
 }
 
 #[cfg(debug_assertions)]
+#[allow(unused_imports)]
 pub use debug::get_file;
 #[cfg(debug_assertions)]
 use debug::serve_file;
@@ -156,6 +157,7 @@ mod release {
 }
 
 #[cfg(not(debug_assertions))]
+#[allow(unused_imports)]
 pub use release::get_file;
 #[cfg(not(debug_assertions))]
 use release::serve_file;

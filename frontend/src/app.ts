@@ -9,9 +9,37 @@ declare global {
     }
 }
 
+export const timezone = encodeURI(Intl.DateTimeFormat().resolvedOptions().timeZone);
+export const browserLanguage = navigator.language || (navigator.languages || ["en-us"])[0];
+
+export enum RowStyle {
+    Disabled,
+    Underlined,
+    Bold,
+}
+
+export interface Entity {
+    primary(): number;
+    resource(): string;
+    resourceName(): string;
+    display(): string;
+    rowStyle(): RowStyle | string | null;
+}
+
 export type User = {
     id: string;
     name: string;
+};
+
+export class ListResult<T> {
+    count: number = 0;
+    items: T[] = [];
+}
+
+export type Unit = {
+    start: string,
+    end: string,
+    timeslots: Timeslot[],
 };
 
 export enum MouseButton {
@@ -74,4 +102,153 @@ export function getLocalTimestamp(d: Date): string {
         ":" +
         d.getSeconds().toString().padStart(2, "0")
     );
+}
+
+export function getWeekNumber(date: Date): number {
+    // Copy date so don't modify original
+    let d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+    // Set to nearest Thursday: current date + 4 - current day number
+    // Make Sunday's day number 7
+    d.setDate(d.getDate() + 4 - (d.getDay()||7));
+    // Get first day of year
+    let yearStart = new Date(d.getUTCFullYear(),0,1);
+    // Calculate full weeks to nearest Thursday
+    return Math.ceil(( ( (d.getTime() - yearStart.getTime()) / 86400000) + 1)/7);
+}
+
+export function getYearFromWeek(date: Date): number {
+    // Copy date so don't modify original
+    let d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+    // Set to nearest Thursday: current date + 4 - current day number
+    // Make Sunday's day number 7
+    d.setDate(d.getDate() + 4 - (d.getDay()||7));
+    return d.getUTCFullYear();
+}
+
+export function formatDuration(durationSeconds: number, short: boolean = false): string {
+    let isNegative = durationSeconds < 0;
+    durationSeconds = Math.abs(durationSeconds);
+    let hours = Math.floor(durationSeconds / 3600);
+    let minutes = Math.floor((durationSeconds % 3600) / 60);
+    let seconds = Math.floor(durationSeconds % 60);
+    if (short) {
+        if (durationSeconds == 0) { return "-"; }
+        let output = "";
+        if (hours > 0) output += hours + "h ";
+        if (minutes > 0) output += minutes + "m ";
+        if (seconds > 0) output += seconds + "s ";
+        return isNegative?"-":"" + output.trim();
+    }
+    return isNegative?"-":"" + hours + "h " + minutes.toString().padStart(2, "0") + "m " + seconds.toString().padStart(2, "0") + "s";
+}
+
+export class Job implements Entity {
+    id: number = 0;
+    name: string | null = null;
+    companyName: string | null = null;
+    companyLogo: string | null = null;
+    description: string | null = null;
+    created: string = "0000-00-00T00:00:00";
+    disabled: boolean = false;
+    activeTracker: Tracker | null = null;
+
+    primary(): number {
+        return this.id;
+    }
+    resource(): string {
+        return "/api/jobs/" + this.primary();
+    }
+    resourceName(): string {
+        return "job";
+    }
+    display(): string {
+        return this.companyName || "Job " + this.primary();
+    }
+    rowStyle(): RowStyle | string | null {
+        return this.disabled?RowStyle.Disabled:null;
+    }
+}
+
+export class Tracker implements Entity {
+    id: number = 0;
+    name: string | null = null;
+    job: number | null = null;
+    owner: number | null = null;
+    created: string = "0000-00-00T00:00:00";
+    validFrom: string | null = null;
+    validUntil: string | null = null;
+    timePensum: number | null = null;
+    timePensumUnit: string = TimePensumUnit[TimePensumUnit.None];
+    displayRangeUnit: string = DisplayRangeUnit[DisplayRangeUnit.Month];
+    timeWorked: number = 0;
+    isActive: boolean = false;
+
+    primary(): number {
+        return this.id;
+    }
+
+    resource(): string {
+        return this.job?("/api/jobs/" + this.job + "/trackers/" + this.primary()):"/api/trackers/" + this.primary();
+    }
+
+    resourceName(): string {
+        return "tracker";
+    }
+
+    display(): string {
+        return this.name || "Tracker " + this.primary();
+    }
+
+    rowStyle(): RowStyle | string | null {
+        let validFrom = new Date(this.validFrom || "");
+        let validUntil = new Date(this.validUntil || "");
+        let now = new Date();
+        let disabled = validFrom > now || validUntil < now;
+        if (disabled) return RowStyle.Disabled;
+        if (this.job!=null && this.isActive) return RowStyle.Bold;
+        return null;
+    }
+}
+
+// Ordering has to be from small to big
+export enum TimePensumUnit {
+    Week,
+    Month,
+    Year,
+    None,
+}
+
+// Ordering has to be the same as TimePensumUnit
+export enum DisplayRangeUnit {
+    Week,
+    Month,
+    Year,
+}
+
+export class Timeslot implements Entity {
+    id: number = 0;
+    tracker: number = 0;
+    start: string = "0000-00-00T00:00:00";
+    end: string | null = null;
+    comment: string | null = null;
+
+    primary(): number {
+        return this.id;
+    }
+    
+    resource(): string {
+        return "/api/timeslots/" + this.primary();
+    }
+
+    resourceName(): string {
+        return "timeslot";
+    }
+    
+    display(): string {
+        return this.comment || "Timeslot " + this.primary();
+    }
+    
+    rowStyle(): RowStyle | string | null {
+        return this.end==null?RowStyle.Bold:null;
+    }
 }

@@ -1,7 +1,7 @@
 <script lang="ts">
     export let navbar: boolean = true;
     export let footer: boolean = true;
-    export let hide_footer: boolean = true;
+    export let hideFooter: boolean = true;
 
     import Navbar from "../../components/essentials/Navbar.svelte";
     import Footer from "../../components/essentials/Footer.svelte";
@@ -19,7 +19,7 @@
     <div class="content-container" bind:this={$content}>
         <main
             class="page-content container mx-auto px-4 pt-3 md:pt-6"
-            style={hide_footer ? "flex-basis: 100%" : ""}
+            style={hideFooter ? "flex-basis: 100%" : ""}
         >
             <slot />
         </main>

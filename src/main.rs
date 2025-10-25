@@ -1,11 +1,18 @@
 use actix_session::{storage::CookieSessionStore, SessionMiddleware};
 use actix_web::{cookie::SameSite, App, HttpServer};
 
+mod api;
 mod app_data;
+mod entities;
+
 mod error;
 mod frontend;
 mod update_value;
 mod user;
+
+mod job;
+mod timeslot;
+mod tracker;
 
 pub(crate) use app_data::AppData;
 
@@ -55,6 +62,7 @@ async fn main() -> std::io::Result<()> {
             )
             .configure(user::init)
             .configure(frontend::init)
+            .configure(api::init)
     })
     .bind(("0.0.0.0", port))?
     .run()

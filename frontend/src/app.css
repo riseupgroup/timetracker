@@ -39,3 +39,7 @@
         background-color: #575e62;
     }
 }
+
+select {
+    font-weight: 400;
+}
