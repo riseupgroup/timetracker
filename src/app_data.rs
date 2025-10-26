@@ -24,6 +24,7 @@ unsafe impl<T> Sync for InitOnce<T> {}
 pub struct AppData {
     pub conn: sea_orm::DbConn,
     pub authentication_service: authentication_service::Client,
+    pub api_key_duration: chrono::Duration,
 }
 
 impl AppData {
@@ -56,6 +57,16 @@ impl AppData {
             authentication_service::Client::new(server_id, &private_key, host, &server_key).unwrap()
         };
 
+        let api_key_duration = match std::env::var("API_KEY_REFRESH_LAST_USED_AFTER") {
+            Ok(duration_string) => {
+                chrono::Duration::from_std(parse_duration::parse(&duration_string).expect("Error parsing environment variable API_KEY_REFRESH_LAST_USED_AFTER, format after ISO 8601")).expect("Error parsing environment variable API_KEY_REFRESH_LAST_USED_AFTER: out of range")
+            },
+            Err(_) => {
+                log::warn!("Missing environment variable API_KEY_REFRESH_LAST_USED_AFTER; Using default of 5 seconds");
+                chrono::Duration::seconds(5)
+            }
+        };
+
         let database_url =
             std::env::var("DATABASE_URL").expect("Missing environment variable DATABASE_URL");
 
@@ -69,6 +80,7 @@ impl AppData {
         Self {
             conn,
             authentication_service,
+            api_key_duration,
         }
     }
 

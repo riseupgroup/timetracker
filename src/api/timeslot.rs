@@ -5,20 +5,19 @@ use {
             get_units, NewTimeslot, TimeslotFilterParams, TimeslotSearchParams, UpdateTimeslot,
         },
         tracker::ExtendedTracker,
-        user::SessionUser,
+        Authentication,
     },
-    actix_session::Session,
     actix_web::{delete, get, patch, post, put, web, Error, HttpResponse},
     serde_qs::actix::QsQuery,
 };
 
 #[post("/api/trackers/{id}/timeslots")]
 async fn create_tracker(
-    session: Session,
+    auth: Authentication,
     new_timeslot: web::Json<NewTimeslot>,
     tracker: web::Path<u32>,
 ) -> Result<HttpResponse, Error> {
-    let user = SessionUser::try_from(&session)?;
+    let user = auth.take()?;
     let timeslot = timeslot::Model::create(
         &user,
         new_timeslot.into_inner(),
@@ -31,11 +30,11 @@ async fn create_tracker(
 
 #[post("/api/jobs/{job_id}/trackers/{trackers_id}/timeslots")]
 async fn create_job_tracker(
-    session: Session,
+    auth: Authentication,
     new_timeslot: web::Json<NewTimeslot>,
     path: web::Path<(u32, u32)>,
 ) -> Result<HttpResponse, Error> {
-    let user = SessionUser::try_from(&session)?;
+    let user = auth.take()?;
     let (job, tracker) = path.into_inner();
     let timeslot =
         timeslot::Model::create(&user, new_timeslot.into_inner(), Some(tracker), Some(job)).await?;
@@ -44,11 +43,11 @@ async fn create_job_tracker(
 
 #[post("/api/jobs/{id}/timeslots")]
 async fn create_job(
-    session: Session,
+    auth: Authentication,
     new_timeslot: web::Json<NewTimeslot>,
     job: web::Path<u32>,
 ) -> Result<HttpResponse, Error> {
-    let user = SessionUser::try_from(&session)?;
+    let user = auth.take()?;
     let timeslot = timeslot::Model::create(
         &user,
         new_timeslot.into_inner(),
@@ -61,11 +60,11 @@ async fn create_job(
 
 #[put("/api/trackers/{id}/timeslots")]
 async fn create_many_tracker(
-    session: Session,
+    auth: Authentication,
     new_timeslots: web::Json<Vec<NewTimeslot>>,
     tracker: web::Path<u32>,
 ) -> Result<HttpResponse, Error> {
-    let user = SessionUser::try_from(&session)?;
+    let user = auth.take()?;
     let timeslots = timeslot::Model::create_many(
         &user,
         new_timeslots.into_inner(),
@@ -78,11 +77,11 @@ async fn create_many_tracker(
 
 #[put("/api/jobs/{job_id}/trackers/{trackers_id}/timeslots")]
 async fn create_many_job_tracker(
-    session: Session,
+    auth: Authentication,
     new_timeslots: web::Json<Vec<NewTimeslot>>,
     path: web::Path<(u32, u32)>,
 ) -> Result<HttpResponse, Error> {
-    let user = SessionUser::try_from(&session)?;
+    let user = auth.take()?;
     let (job, tracker) = path.into_inner();
     let timeslots =
         timeslot::Model::create_many(&user, new_timeslots.into_inner(), Some(tracker), Some(job))
@@ -92,11 +91,11 @@ async fn create_many_job_tracker(
 
 #[put("/api/jobs/{id}/timeslots")]
 async fn create_many_job(
-    session: Session,
+    auth: Authentication,
     new_timeslots: web::Json<Vec<NewTimeslot>>,
     job: web::Path<u32>,
 ) -> Result<HttpResponse, Error> {
-    let user = SessionUser::try_from(&session)?;
+    let user = auth.take()?;
     let timeslots = timeslot::Model::create_many(
         &user,
         new_timeslots.into_inner(),
@@ -108,18 +107,21 @@ async fn create_many_job(
 }
 
 #[get("/api/timeslots/{id}")]
-async fn get_standalone(session: Session, timeslot: web::Path<u64>) -> Result<HttpResponse, Error> {
-    let user = SessionUser::try_from(&session)?;
+async fn get_standalone(
+    auth: Authentication,
+    timeslot: web::Path<u64>,
+) -> Result<HttpResponse, Error> {
+    let user = auth.take()?;
     let timeslot = timeslot::Model::get(timeslot.into_inner(), None, &user, None).await?;
     Ok(HttpResponse::Ok().json(timeslot))
 }
 
 #[get("/api/trackers/{tracker_id}/timeslots/current")]
 async fn get_tracker_current(
-    session: Session,
+    auth: Authentication,
     tracker: web::Path<u32>,
 ) -> Result<HttpResponse, Error> {
-    let user = SessionUser::try_from(&session)?;
+    let user = auth.take()?;
     let tracker = tracker.into_inner();
     let tracker = ExtendedTracker::get(Some(tracker), None, &user)
         .await?
@@ -129,8 +131,11 @@ async fn get_tracker_current(
 }
 
 #[get("/api/trackers/{tracker_id}/timeslots/{timeslot_id}")]
-async fn get_tracker(session: Session, path: web::Path<(u32, u64)>) -> Result<HttpResponse, Error> {
-    let user = SessionUser::try_from(&session)?;
+async fn get_tracker(
+    auth: Authentication,
+    path: web::Path<(u32, u64)>,
+) -> Result<HttpResponse, Error> {
+    let user = auth.take()?;
     let (tracker, timeslot) = path.into_inner();
     let timeslot = timeslot::Model::get(timeslot, Some(tracker), &user, None).await?;
     Ok(HttpResponse::Ok().json(timeslot))
@@ -138,10 +143,10 @@ async fn get_tracker(session: Session, path: web::Path<(u32, u64)>) -> Result<Ht
 
 #[get("/api/jobs/{job_id}/trackers/{tracker_id}/timeslots/current")]
 async fn get_job_tracker_current(
-    session: Session,
+    auth: Authentication,
     path: web::Path<(u32, u32)>,
 ) -> Result<HttpResponse, Error> {
-    let user = SessionUser::try_from(&session)?;
+    let user = auth.take()?;
     let (job, tracker) = path.into_inner();
     let tracker = ExtendedTracker::get(Some(tracker), Some(job), &user)
         .await?
@@ -152,10 +157,10 @@ async fn get_job_tracker_current(
 
 #[get("/api/jobs/{job_id}/trackers/{tracker_id}/timeslots/{timeslot_id}")]
 async fn get_job_tracker(
-    session: Session,
+    auth: Authentication,
     path: web::Path<(u32, u32, u64)>,
 ) -> Result<HttpResponse, Error> {
-    let user = SessionUser::try_from(&session)?;
+    let user = auth.take()?;
     let (job, tracker, timeslot) = path.into_inner();
 
     let timeslot = timeslot::Model::get(timeslot, Some(tracker), &user, Some(job)).await?;
@@ -163,8 +168,8 @@ async fn get_job_tracker(
 }
 
 #[get("/api/jobs/{job_id}/timeslots/current")]
-async fn get_job_current(session: Session, job: web::Path<u32>) -> Result<HttpResponse, Error> {
-    let user = SessionUser::try_from(&session)?;
+async fn get_job_current(auth: Authentication, job: web::Path<u32>) -> Result<HttpResponse, Error> {
+    let user = auth.take()?;
     let tracker = ExtendedTracker::get(None, Some(job.into_inner()), &user)
         .await?
         .tracker;
@@ -173,8 +178,8 @@ async fn get_job_current(session: Session, job: web::Path<u32>) -> Result<HttpRe
 }
 
 #[get("/api/jobs/{job_id}/timeslots/{timeslot_id}")]
-async fn get_job(session: Session, path: web::Path<(u32, u64)>) -> Result<HttpResponse, Error> {
-    let user = SessionUser::try_from(&session)?;
+async fn get_job(auth: Authentication, path: web::Path<(u32, u64)>) -> Result<HttpResponse, Error> {
+    let user = auth.take()?;
     let (job, timeslot) = path.into_inner();
 
     let timeslot = timeslot::Model::get(timeslot, None, &user, Some(job)).await?;
@@ -183,12 +188,12 @@ async fn get_job(session: Session, path: web::Path<(u32, u64)>) -> Result<HttpRe
 
 #[get("/api/trackers/{id}/timeslots")]
 async fn get_many_tracker(
-    session: Session,
+    auth: Authentication,
     tracker: web::Path<u32>,
     params: web::Query<TimeslotSearchParams>,
 ) -> Result<HttpResponse, Error> {
     let params = params.into_inner();
-    let user = SessionUser::try_from(&session)?;
+    let user = auth.take()?;
 
     let timeslots =
         timeslot::Model::get_many(&user, params, Some(tracker.into_inner()), None).await?;
@@ -197,12 +202,12 @@ async fn get_many_tracker(
 
 #[get("/api/jobs/{job_id}/trackers/{tracker_id}/timeslots")]
 async fn get_many_job_tracker(
-    session: Session,
+    auth: Authentication,
     path: web::Path<(u32, u32)>,
     params: web::Query<TimeslotSearchParams>,
 ) -> Result<HttpResponse, Error> {
     let params = params.into_inner();
-    let user = SessionUser::try_from(&session)?;
+    let user = auth.take()?;
     let (job, tracker) = path.into_inner();
 
     let timeslots = timeslot::Model::get_many(&user, params, Some(tracker), Some(job)).await?;
@@ -211,24 +216,24 @@ async fn get_many_job_tracker(
 
 #[get("/api/jobs/{id}/timeslots")]
 async fn get_many_job(
-    session: Session,
+    auth: Authentication,
     job: web::Path<u32>,
     params: web::Query<TimeslotSearchParams>,
 ) -> Result<HttpResponse, Error> {
     let params = params.into_inner();
-    let user = SessionUser::try_from(&session)?;
+    let user = auth.take()?;
     let timeslots = timeslot::Model::get_many(&user, params, None, Some(job.into_inner())).await?;
     Ok(HttpResponse::Ok().json(timeslots))
 }
 
 #[get("/api/trackers/{id}/units")]
 async fn get_units_tracker(
-    session: Session,
+    auth: Authentication,
     tracker: web::Path<u32>,
     params: QsQuery<TimeslotFilterParams>,
 ) -> Result<HttpResponse, Error> {
     let params = params.into_inner();
-    let user = SessionUser::try_from(&session)?;
+    let user = auth.take()?;
 
     let tracker = ExtendedTracker::get(Some(tracker.into_inner()), None, &user).await?;
     let units = get_units(tracker.tracker, params).await?;
@@ -238,12 +243,12 @@ async fn get_units_tracker(
 
 #[get("/api/jobs/{job_id}/trackers/{tracker_id}/units")]
 async fn get_units_job_tracker(
-    session: Session,
+    auth: Authentication,
     path: web::Path<(u32, u32)>,
     params: QsQuery<TimeslotFilterParams>,
 ) -> Result<HttpResponse, Error> {
     let params = params.into_inner();
-    let user = SessionUser::try_from(&session)?;
+    let user = auth.take()?;
     let (job, tracker) = path.into_inner();
 
     let tracker = ExtendedTracker::get(Some(tracker), Some(job), &user).await?;
@@ -254,12 +259,12 @@ async fn get_units_job_tracker(
 
 #[get("/api/jobs/{job_id}/units")]
 async fn get_units_job(
-    session: Session,
+    auth: Authentication,
     job: web::Path<u32>,
     params: QsQuery<TimeslotFilterParams>,
 ) -> Result<HttpResponse, Error> {
     let params = params.into_inner();
-    let user = SessionUser::try_from(&session)?;
+    let user = auth.take()?;
 
     let tracker = ExtendedTracker::get(None, Some(job.into_inner()), &user).await?;
     let units = get_units(tracker.tracker, params).await?;
@@ -269,11 +274,11 @@ async fn get_units_job(
 
 #[patch("/api/timeslots/{id}")]
 async fn update_standalone(
-    session: Session,
+    auth: Authentication,
     timeslot: web::Path<u64>,
     update: web::Json<UpdateTimeslot>,
 ) -> Result<HttpResponse, Error> {
-    let user = SessionUser::try_from(&session)?;
+    let user = auth.take()?;
 
     let (timeslot, tracker) =
         timeslot::Model::get_with_tracker(timeslot.into_inner(), None, &user, None).await?;
@@ -284,11 +289,11 @@ async fn update_standalone(
 
 #[patch("/api/trackers/{tracker_id}/timeslots/current")]
 async fn update_tracker_current(
-    session: Session,
+    auth: Authentication,
     tracker: web::Path<u32>,
     update: web::Json<UpdateTimeslot>,
 ) -> Result<HttpResponse, Error> {
-    let user = SessionUser::try_from(&session)?;
+    let user = auth.take()?;
 
     let tracker = ExtendedTracker::get(Some(tracker.into_inner()), None, &user)
         .await?
@@ -301,11 +306,11 @@ async fn update_tracker_current(
 
 #[patch("/api/trackers/{tracker_id}/timeslots/{timeslot_id}")]
 async fn update_tracker(
-    session: Session,
+    auth: Authentication,
     path: web::Path<(u32, u64)>,
     update: web::Json<UpdateTimeslot>,
 ) -> Result<HttpResponse, Error> {
-    let user = SessionUser::try_from(&session)?;
+    let user = auth.take()?;
     let (tracker, timeslot) = path.into_inner();
 
     let (timeslot, tracker) =
@@ -317,11 +322,11 @@ async fn update_tracker(
 
 #[patch("/api/jobs/{job_id}/trackers/{tracker_id}/timeslots/current")]
 async fn update_job_tracker_current(
-    session: Session,
+    auth: Authentication,
     path: web::Path<(u32, u32)>,
     update: web::Json<UpdateTimeslot>,
 ) -> Result<HttpResponse, Error> {
-    let user = SessionUser::try_from(&session)?;
+    let user = auth.take()?;
     let (job, tracker) = path.into_inner();
 
     let tracker = ExtendedTracker::get(Some(tracker), Some(job), &user)
@@ -335,11 +340,11 @@ async fn update_job_tracker_current(
 
 #[patch("/api/jobs/{job_id}/trackers/{tracker_id}/timeslots/{timeslot_id}")]
 async fn update_job_tracker(
-    session: Session,
+    auth: Authentication,
     path: web::Path<(u32, u32, u64)>,
     update: web::Json<UpdateTimeslot>,
 ) -> Result<HttpResponse, Error> {
-    let user = SessionUser::try_from(&session)?;
+    let user = auth.take()?;
     let (job, tracker, timeslot) = path.into_inner();
 
     let (timeslot, tracker) =
@@ -351,11 +356,11 @@ async fn update_job_tracker(
 
 #[patch("/api/jobs/{job_id}/timeslots/current")]
 async fn update_job_current(
-    session: Session,
+    auth: Authentication,
     job: web::Path<u32>,
     update: web::Json<UpdateTimeslot>,
 ) -> Result<HttpResponse, Error> {
-    let user = SessionUser::try_from(&session)?;
+    let user = auth.take()?;
 
     let tracker = ExtendedTracker::get(None, Some(job.into_inner()), &user)
         .await?
@@ -368,11 +373,11 @@ async fn update_job_current(
 
 #[patch("/api/jobs/{job_id}/timeslots/{timeslot_id}")]
 async fn update_job(
-    session: Session,
+    auth: Authentication,
     path: web::Path<(u32, u64)>,
     update: web::Json<UpdateTimeslot>,
 ) -> Result<HttpResponse, Error> {
-    let user = SessionUser::try_from(&session)?;
+    let user = auth.take()?;
     let (job, timeslot) = path.into_inner();
 
     let (timeslot, tracker) =
@@ -384,10 +389,10 @@ async fn update_job(
 
 #[delete("/api/timeslots/{id}")]
 async fn delete_standalone(
-    session: Session,
+    auth: Authentication,
     timeslot: web::Path<u64>,
 ) -> Result<HttpResponse, Error> {
-    let user = SessionUser::try_from(&session)?;
+    let user = auth.take()?;
 
     let timeslot = timeslot::Model::get(timeslot.into_inner(), None, &user, None).await?;
     timeslot.delete().await?;
@@ -397,10 +402,10 @@ async fn delete_standalone(
 
 #[delete("/api/trackers/{tracker_id}/timeslots/current")]
 async fn delete_tracker_current(
-    session: Session,
+    auth: Authentication,
     tracker: web::Path<u32>,
 ) -> Result<HttpResponse, Error> {
-    let user = SessionUser::try_from(&session)?;
+    let user = auth.take()?;
 
     let tracker = ExtendedTracker::get(Some(tracker.into_inner()), None, &user)
         .await?
@@ -412,10 +417,10 @@ async fn delete_tracker_current(
 
 #[delete("/api/trackers/{tracker_id}/timeslots/{timeslot_id}")]
 async fn delete_tracker(
-    session: Session,
+    auth: Authentication,
     path: web::Path<(u32, u64)>,
 ) -> Result<HttpResponse, Error> {
-    let user = SessionUser::try_from(&session)?;
+    let user = auth.take()?;
     let (tracker, timeslot) = path.into_inner();
 
     let timeslot = timeslot::Model::get(timeslot, Some(tracker), &user, None).await?;
@@ -426,10 +431,10 @@ async fn delete_tracker(
 
 #[delete("/api/jobs/{job_id}/trackers/{tracker_id}/timeslots/current")]
 async fn delete_job_tracker_current(
-    session: Session,
+    auth: Authentication,
     path: web::Path<(u32, u32)>,
 ) -> Result<HttpResponse, Error> {
-    let user = SessionUser::try_from(&session)?;
+    let user = auth.take()?;
     let (job, tracker) = path.into_inner();
 
     let tracker = ExtendedTracker::get(Some(tracker), Some(job), &user)
@@ -442,10 +447,10 @@ async fn delete_job_tracker_current(
 
 #[delete("/api/jobs/{job_id}/trackers/{tracker_id}/timeslots/{timeslot_id}")]
 async fn delete_job_tracker(
-    session: Session,
+    auth: Authentication,
     path: web::Path<(u32, u32, u64)>,
 ) -> Result<HttpResponse, Error> {
-    let user = SessionUser::try_from(&session)?;
+    let user = auth.take()?;
     let (job, tracker, timeslot) = path.into_inner();
 
     let timeslot = timeslot::Model::get(timeslot, Some(tracker), &user, Some(job)).await?;
@@ -455,8 +460,11 @@ async fn delete_job_tracker(
 }
 
 #[delete("/api/jobs/{job_id}/timeslots/current")]
-async fn delete_job_current(session: Session, job: web::Path<u32>) -> Result<HttpResponse, Error> {
-    let user = SessionUser::try_from(&session)?;
+async fn delete_job_current(
+    auth: Authentication,
+    job: web::Path<u32>,
+) -> Result<HttpResponse, Error> {
+    let user = auth.take()?;
 
     let tracker = ExtendedTracker::get(None, Some(job.into_inner()), &user)
         .await?
@@ -467,8 +475,11 @@ async fn delete_job_current(session: Session, job: web::Path<u32>) -> Result<Htt
 }
 
 #[delete("/api/jobs/{job_id}/timeslots/{timeslot_id}")]
-async fn delete_job(session: Session, path: web::Path<(u32, u64)>) -> Result<HttpResponse, Error> {
-    let user = SessionUser::try_from(&session)?;
+async fn delete_job(
+    auth: Authentication,
+    path: web::Path<(u32, u64)>,
+) -> Result<HttpResponse, Error> {
+    let user = auth.take()?;
     let (job, timeslot) = path.into_inner();
 
     let timeslot = timeslot::Model::get(timeslot, None, &user, Some(job)).await?;

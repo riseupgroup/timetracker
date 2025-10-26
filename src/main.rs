@@ -2,9 +2,11 @@ use actix_session::{storage::CookieSessionStore, SessionMiddleware};
 use actix_web::{cookie::SameSite, App, HttpServer};
 
 mod api;
+mod api_key;
 mod app_data;
 mod entities;
 
+mod authentication_middleware;
 mod error;
 mod frontend;
 mod update_value;
@@ -14,7 +16,7 @@ mod job;
 mod timeslot;
 mod tracker;
 
-pub(crate) use app_data::AppData;
+pub(crate) use {app_data::AppData, authentication_middleware::Authentication};
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -53,6 +55,7 @@ async fn main() -> std::io::Result<()> {
     HttpServer::new(move || {
         App::new()
             .wrap(actix_web::middleware::Logger::default())
+            .wrap(authentication_middleware::AuthenticationMiddleware)
             .wrap(
                 SessionMiddleware::builder(CookieSessionStore::default(), secret_key.clone())
                     .cookie_http_only(true)

@@ -3,54 +3,53 @@ use {
         entities::job,
         job::{NewJob, UpdateJob},
         tracker::Timezone,
-        user::SessionUser,
+        Authentication,
     },
-    actix_session::Session,
     actix_web::{delete, get, patch, post, put, web, Error, HttpResponse, Responder},
 };
 
 #[post("/api/jobs")]
-async fn create(session: Session, new_job: web::Json<NewJob>) -> Result<impl Responder, Error> {
-    let user = SessionUser::try_from(&session)?;
+async fn create(auth: Authentication, new_job: web::Json<NewJob>) -> Result<impl Responder, Error> {
+    let user = auth.take()?;
     let job = job::Model::create(new_job.into_inner(), &user).await?;
     Ok(HttpResponse::Created().json(job))
 }
 
 #[put("/api/jobs")]
 async fn create_many(
-    session: Session,
+    auth: Authentication,
     new_jobs: web::Json<Vec<NewJob>>,
 ) -> Result<impl Responder, Error> {
-    let user = SessionUser::try_from(&session)?;
+    let user = auth.take()?;
     let jobs = job::Model::create_many(new_jobs.into_inner(), &user).await?;
     Ok(HttpResponse::Created().json(jobs))
 }
 
 #[get("/api/jobs/{id}")]
 async fn get(
-    session: Session,
+    auth: Authentication,
     job: web::Path<u32>,
     params: web::Query<Timezone>,
 ) -> Result<impl Responder, Error> {
-    let user = SessionUser::try_from(&session)?;
+    let user = auth.take()?;
     let job = job::Model::get_extended(job.into_inner(), &user, params.timezone).await?;
     Ok(HttpResponse::Ok().json(job))
 }
 
 #[get("/api/jobs")]
-async fn get_many(session: Session) -> Result<impl Responder, Error> {
-    let user = SessionUser::try_from(&session)?;
+async fn get_many(auth: Authentication) -> Result<impl Responder, Error> {
+    let user = auth.take()?;
     let jobs = job::Model::get_extended_many(&user).await?;
     Ok(HttpResponse::Ok().json(jobs))
 }
 
 #[patch("/api/jobs/{id}")]
 async fn update(
-    session: Session,
+    auth: Authentication,
     job: web::Path<u32>,
     update_job: web::Json<UpdateJob>,
 ) -> Result<impl Responder, Error> {
-    let user = SessionUser::try_from(&session)?;
+    let user = auth.take()?;
     let job = job::Model::update(
         update_job.into_inner(),
         job::Model::get(job.into_inner(), &user).await?,
@@ -60,8 +59,8 @@ async fn update(
 }
 
 #[delete("/api/jobs/{id}")]
-async fn delete(session: Session, job: web::Path<u32>) -> Result<impl Responder, Error> {
-    let user = SessionUser::try_from(&session)?;
+async fn delete(auth: Authentication, job: web::Path<u32>) -> Result<impl Responder, Error> {
+    let user = auth.take()?;
     job::Model::get(job.into_inner(), &user)
         .await?
         .delete()

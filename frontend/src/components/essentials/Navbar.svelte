@@ -76,6 +76,13 @@
                     new MouseClick(mouseEvent).goto("/trackers");
                 }}>Trackers</NavLi
             >
+            <NavLi
+                href="/integrations"
+                on:click={(mouseEvent) => {
+                    mouseEvent.preventDefault();
+                    new MouseClick(mouseEvent).goto("/integrations");
+                }}>API</NavLi
+            >
             <NavLi href="http://github.com/riseupgroup">GitHub</NavLi>
         {:else}
             <NavLi href="http://github.com/riseupgroup">GitHub</NavLi>

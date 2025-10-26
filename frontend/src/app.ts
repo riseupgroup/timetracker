@@ -252,3 +252,43 @@ export class Timeslot implements Entity {
         return this.end==null?RowStyle.Bold:null;
     }
 }
+
+export class ApiKey implements Entity {
+    id: number = 0;
+    name: string | null = null;
+    disabled: boolean = false;
+    validUntil: string | null = null;
+    added: string = "";
+    lastChanged: string = "";
+    lastUsed: string | null = null;
+
+    primary(): number {
+        return this.id;
+    }
+
+    resource(): string {
+        return "/api/keys/" + this.id;
+    }
+
+    resourceName(): string {
+        return "api key";
+    }
+
+    display(): string {
+        return this.name ? this.name : "Key " + this.primary();
+    }
+
+    isDisabled(): boolean {
+        return this.disabled;
+    }
+
+    rowStyle(): RowStyle | string | null {
+        return this.disabled?RowStyle.Disabled:null;
+    }
+}
+
+export class ApiKeyResponse {
+    id: number = 0;
+    key: string = "";
+    name: string | null = null;
+}

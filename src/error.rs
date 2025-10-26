@@ -64,3 +64,11 @@ impl ToErr for actix_session::SessionInsertError {
         internal_server_error(self)
     }
 }
+
+impl ToErr for password_hash::Error {
+    type Return = Error;
+
+    fn to_err(self) -> Self::Return {
+        internal_server_error(self)
+    }
+}

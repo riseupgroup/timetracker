@@ -1,5 +1,6 @@
 use {
     crate::{
+        authentication_middleware::InnerAuthentication,
         entities::{
             job,
             prelude::{Job, Tracker},
@@ -7,7 +8,6 @@ use {
         error::{MapToErr, ToErr},
         tracker::ExtendedTracker,
         update_value::{UpdateOption, UpdateValue},
-        user::SessionUser,
         AppData,
     },
     actix_web::{
@@ -24,14 +24,14 @@ use {
 };
 
 impl job::Model {
-    pub async fn create(new_job: NewJob, user: &SessionUser) -> Result<Self, Error> {
+    pub async fn create(new_job: NewJob, user: &InnerAuthentication) -> Result<Self, Error> {
         let active_model = new_job.into_active_model(user.id);
         active_model.insert(&AppData::get().conn).await.to_err()
     }
 
     pub async fn create_many(
         new_jobs: Vec<NewJob>,
-        user: &SessionUser,
+        user: &InnerAuthentication,
     ) -> Result<Vec<Self>, Error> {
         let txn = AppData::get().conn.begin().await.to_err()?;
         let mut jobs = Vec::with_capacity(new_jobs.len());
@@ -49,7 +49,7 @@ impl job::Model {
         Ok(jobs)
     }
 
-    pub async fn get(job: u32, user: &SessionUser) -> Result<Self, Error> {
+    pub async fn get(job: u32, user: &InnerAuthentication) -> Result<Self, Error> {
         let job = Job::find_by_id(job)
             .one(&AppData::get().conn)
             .await
@@ -64,7 +64,7 @@ impl job::Model {
 
     pub async fn get_extended(
         job: u32,
-        user: &SessionUser,
+        user: &InnerAuthentication,
         timezone: Tz,
     ) -> Result<ExtendedJob, Error> {
         let (job, active_tracker) = Job::find_by_id(job)
@@ -96,7 +96,7 @@ impl job::Model {
         })
     }
 
-    pub async fn get_extended_many(user: &SessionUser) -> Result<Vec<ExtendedJob>, Error> {
+    pub async fn get_extended_many(user: &InnerAuthentication) -> Result<Vec<ExtendedJob>, Error> {
         let extended_jobs = Job::find()
             .filter(job::Column::Owner.eq(user.id))
             .find_also_related(Tracker)

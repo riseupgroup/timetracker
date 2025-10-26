@@ -1,6 +1,5 @@
 use {
-    crate::user::SessionUser,
-    actix_session::Session,
+    crate::Authentication,
     actix_web::{
         get,
         http::{
@@ -61,7 +60,7 @@ mod debug {
 
     pub(super) async fn serve_file(
         req: HttpRequest,
-        session: Session,
+        auth: Authentication,
         query: web::Query<Query>,
     ) -> Result<HttpResponse, Error> {
         if req.method() != Method::GET {
@@ -70,7 +69,7 @@ mod debug {
         let path = req.path().trim_matches('/');
 
         match PATHS.find(path) {
-            Some(_) if SessionUser::try_from(&session).is_ok() => {
+            Some(_) if auth.is_some() => {
                 if path == "login" {
                     Ok(HttpResponse::TemporaryRedirect()
                         .append_header(("location", query.path.as_deref().unwrap_or("/")))
@@ -126,7 +125,7 @@ mod release {
 
     pub(super) async fn serve_file(
         req: HttpRequest,
-        session: Session,
+        auth: Authentication,
         query: web::Query<Query>,
     ) -> Result<HttpResponse, Error> {
         if req.method() != Method::GET {
@@ -135,13 +134,10 @@ mod release {
         let path = req.path().trim_matches('/');
 
         match PATHS.find(path) {
-            Some(_) if SessionUser::try_from(&session).is_ok() => {
+            Some(_) if auth.is_some() => {
                 if path == "login" {
                     Ok(HttpResponse::TemporaryRedirect()
-                        .append_header((
-                            "location",
-                            query.path.as_ref().map(String::as_str).unwrap_or("/"),
-                        ))
+                        .append_header(("location", query.path.as_deref().unwrap_or("/")))
                         .finish())
                 } else {
                     Ok(get_file("index.html", &req))

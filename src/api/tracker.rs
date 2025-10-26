@@ -1,9 +1,8 @@
 use {
     crate::{
         tracker::{ExtendedTracker, NewTracker, Timezone, UpdateTracker},
-        user::SessionUser,
+        Authentication,
     },
-    actix_session::Session,
     actix_web::{delete, get, patch, post, put, web, Error, HttpResponse},
     chrono::NaiveDate,
     chrono_tz::Tz,
@@ -12,21 +11,21 @@ use {
 
 #[post("/api/trackers")]
 async fn create_standalone(
-    session: Session,
+    auth: Authentication,
     new_tracker: web::Json<NewTracker>,
 ) -> Result<HttpResponse, Error> {
-    let user = SessionUser::try_from(&session)?;
+    let user = auth.take()?;
     let tracker = ExtendedTracker::create(&user, new_tracker.into_inner(), None).await?;
     Ok(HttpResponse::Created().json(tracker))
 }
 
 #[post("/api/jobs/{id}/trackers")]
 async fn create_job(
-    session: Session,
+    auth: Authentication,
     new_tracker: web::Json<NewTracker>,
     job: web::Path<u32>,
 ) -> Result<HttpResponse, Error> {
-    let user = SessionUser::try_from(&session)?;
+    let user = auth.take()?;
     let tracker =
         ExtendedTracker::create(&user, new_tracker.into_inner(), Some(job.into_inner())).await?;
     Ok(HttpResponse::Created().json(tracker))
@@ -34,21 +33,21 @@ async fn create_job(
 
 #[put("/api/trackers")]
 async fn create_many_standalone(
-    session: Session,
+    auth: Authentication,
     new_trackers: web::Json<Vec<NewTracker>>,
 ) -> Result<HttpResponse, Error> {
-    let user = SessionUser::try_from(&session)?;
+    let user = auth.take()?;
     let trackers = ExtendedTracker::create_many(&user, new_trackers.into_inner(), None).await?;
     Ok(HttpResponse::Created().json(trackers))
 }
 
 #[put("/api/jobs/{id}/trackers")]
 async fn create_many_job(
-    session: Session,
+    auth: Authentication,
     new_trackers: web::Json<Vec<NewTracker>>,
     job: web::Path<u32>,
 ) -> Result<HttpResponse, Error> {
-    let user = SessionUser::try_from(&session)?;
+    let user = auth.take()?;
     let trackers =
         ExtendedTracker::create_many(&user, new_trackers.into_inner(), Some(job.into_inner()))
             .await?;
@@ -57,11 +56,11 @@ async fn create_many_job(
 
 #[get("/api/trackers/{id}")]
 async fn get_standalone(
-    session: Session,
+    auth: Authentication,
     tracker: web::Path<u32>,
     params: web::Query<Timezone>,
 ) -> Result<HttpResponse, Error> {
-    let user = SessionUser::try_from(&session)?;
+    let user = auth.take()?;
     let tracker = ExtendedTracker::get_with_time_worked(
         Some(tracker.into_inner()),
         None,
@@ -74,11 +73,11 @@ async fn get_standalone(
 
 #[get("/api/jobs/{job_id}/trackers/{tracker_id}")]
 async fn get_job(
-    session: Session,
+    auth: Authentication,
     path: web::Path<(u32, u32)>,
     params: web::Query<Timezone>,
 ) -> Result<HttpResponse, Error> {
-    let user = SessionUser::try_from(&session)?;
+    let user = auth.take()?;
     let (job_id, tracker_id) = path.into_inner();
 
     let tracker = ExtendedTracker::get_with_time_worked(
@@ -93,15 +92,15 @@ async fn get_job(
 }
 
 #[get("/api/trackers")]
-async fn get_many_standalone(session: Session) -> Result<HttpResponse, Error> {
-    let user = SessionUser::try_from(&session)?;
+async fn get_many_standalone(auth: Authentication) -> Result<HttpResponse, Error> {
+    let user = auth.take()?;
     let trackers = ExtendedTracker::get_many(&user, None).await?;
     Ok(HttpResponse::Ok().json(trackers))
 }
 
 #[get("/api/jobs/{id}/trackers")]
-async fn get_many_job(session: Session, job: web::Path<u32>) -> Result<HttpResponse, Error> {
-    let user = SessionUser::try_from(&session)?;
+async fn get_many_job(auth: Authentication, job: web::Path<u32>) -> Result<HttpResponse, Error> {
+    let user = auth.take()?;
     let trackers = ExtendedTracker::get_many(&user, Some(job.into_inner())).await?;
     Ok(HttpResponse::Ok().json(trackers))
 }
@@ -116,11 +115,11 @@ struct TimeWorkedParams {
 
 #[get("/api/trackers/{id}/time-worked")]
 async fn get_time_worked_standalone(
-    session: Session,
+    auth: Authentication,
     tracker: web::Path<u32>,
     params: web::Query<TimeWorkedParams>,
 ) -> Result<HttpResponse, Error> {
-    let user = SessionUser::try_from(&session)?;
+    let user = auth.take()?;
 
     let tracker = ExtendedTracker::get(Some(tracker.into_inner()), None, &user)
         .await?
@@ -135,11 +134,11 @@ async fn get_time_worked_standalone(
 
 #[get("/api/jobs/{job_id}/trackers/{tracker_id}/time-worked")]
 async fn get_time_worked_job(
-    session: Session,
+    auth: Authentication,
     path: web::Path<(u32, u32)>,
     params: web::Query<TimeWorkedParams>,
 ) -> Result<HttpResponse, Error> {
-    let user = SessionUser::try_from(&session)?;
+    let user = auth.take()?;
     let (job_id, tracker_id) = path.into_inner();
 
     let tracker = ExtendedTracker::get(Some(tracker_id), Some(job_id), &user)
@@ -155,12 +154,12 @@ async fn get_time_worked_job(
 
 #[patch("/api/trackers/{id}")]
 async fn update_standalone(
-    session: Session,
+    auth: Authentication,
     tracker: web::Path<u32>,
     update_tracker: web::Json<UpdateTracker>,
     params: web::Query<Timezone>,
 ) -> Result<HttpResponse, Error> {
-    let user = SessionUser::try_from(&session)?;
+    let user = auth.take()?;
 
     let tracker = ExtendedTracker::get(Some(tracker.into_inner()), None, &user)
         .await?
@@ -172,12 +171,12 @@ async fn update_standalone(
 
 #[patch("/api/jobs/{job_id}/trackers/{tracker_id}")]
 async fn update_job(
-    session: Session,
+    auth: Authentication,
     path: web::Path<(u32, u32)>,
     update_tracker: web::Json<UpdateTracker>,
     params: web::Query<Timezone>,
 ) -> Result<HttpResponse, Error> {
-    let user = SessionUser::try_from(&session)?;
+    let user = auth.take()?;
     let (job_id, tracker_id) = path.into_inner();
 
     let tracker = ExtendedTracker::get(Some(tracker_id), Some(job_id), &user)
@@ -190,10 +189,10 @@ async fn update_job(
 
 #[delete("/api/trackers/{id}")]
 async fn delete_standalone(
-    session: Session,
+    auth: Authentication,
     tracker: web::Path<u32>,
 ) -> Result<HttpResponse, Error> {
-    let user = SessionUser::try_from(&session)?;
+    let user = auth.take()?;
 
     ExtendedTracker::get(Some(tracker.into_inner()), None, &user)
         .await?
@@ -204,8 +203,11 @@ async fn delete_standalone(
 }
 
 #[delete("/api/jobs/{job_id}/trackers/{tracker_id}")]
-async fn delete_job(session: Session, path: web::Path<(u32, u32)>) -> Result<HttpResponse, Error> {
-    let user = SessionUser::try_from(&session)?;
+async fn delete_job(
+    auth: Authentication,
+    path: web::Path<(u32, u32)>,
+) -> Result<HttpResponse, Error> {
+    let user = auth.take()?;
     let (job_id, tracker_id) = path.into_inner();
 
     ExtendedTracker::get(Some(tracker_id), Some(job_id), &user)

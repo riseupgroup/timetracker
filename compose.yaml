@@ -7,6 +7,7 @@ services:
       AUTH_SERVER_HOST: auth.riseupgroup.net
       AUTH_SERVER_ID: 0 # replace with your auth server id (service-id)
       DATABASE_URL: "mysql://timetracker:<password>@db:3306/timetracker"
+      #API_KEY_REFRESH_LAST_USED_AFTER: 5s
     ports:
       - 80:80
     links:

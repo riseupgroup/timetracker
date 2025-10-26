@@ -1,10 +1,10 @@
 use {
     crate::{
+        authentication_middleware::InnerAuthentication,
         entities::{prelude::*, *},
         error::{MapToErr, ToErr},
         tracker::{DisplayRange, ExtendedTracker},
         update_value::{UpdateOption, UpdateValue},
-        user::SessionUser,
         AppData,
     },
     actix_web::{
@@ -39,7 +39,7 @@ pub struct UpdateTimeslot {
 
 impl timeslot::Model {
     pub async fn create(
-        user: &SessionUser,
+        user: &InnerAuthentication,
         new_timeslot: NewTimeslot,
         tracker: Option<u32>,
         job: Option<u32>,
@@ -66,7 +66,7 @@ impl timeslot::Model {
     }
 
     pub async fn create_many(
-        user: &SessionUser,
+        user: &InnerAuthentication,
         new_timeslots: Vec<NewTimeslot>,
         tracker: Option<u32>,
         job: Option<u32>,
@@ -104,7 +104,7 @@ impl timeslot::Model {
     pub async fn get_with_tracker(
         timeslot: u64,
         tracker: Option<u32>,
-        user: &SessionUser,
+        user: &InnerAuthentication,
         job: Option<u32>,
     ) -> Result<(timeslot::Model, tracker::Model), Error> {
         let timeslot = Timeslot::find_by_id(timeslot)
@@ -130,7 +130,7 @@ impl timeslot::Model {
     pub async fn get(
         timeslot: u64,
         tracker: Option<u32>,
-        user: &SessionUser,
+        user: &InnerAuthentication,
         job: Option<u32>,
     ) -> Result<timeslot::Model, Error> {
         let (timeslot, _) = Self::get_with_tracker(timeslot, tracker, user, job).await?;
@@ -138,7 +138,7 @@ impl timeslot::Model {
     }
 
     pub async fn get_many(
-        user: &SessionUser,
+        user: &InnerAuthentication,
         params: TimeslotSearchParams,
         tracker: Option<u32>,
         job: Option<u32>,

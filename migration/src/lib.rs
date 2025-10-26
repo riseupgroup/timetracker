@@ -3,6 +3,7 @@ mod m20241001_173026_create_job;
 mod m20241001_173034_create_tracker;
 mod m20241001_173039_create_timeslot;
 mod m20241001_173342_job_add_active_tracker;
+mod m20251025_192426_create_api_key;
 pub struct Migrator;
 
 #[async_trait::async_trait]
@@ -13,6 +14,7 @@ impl MigratorTrait for Migrator {
             Box::new(m20241001_173034_create_tracker::Migration),
             Box::new(m20241001_173039_create_timeslot::Migration),
             Box::new(m20241001_173342_job_add_active_tracker::Migration),
+            Box::new(m20251025_192426_create_api_key::Migration),
         ]
     }
 }

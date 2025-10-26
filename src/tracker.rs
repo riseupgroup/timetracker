@@ -1,9 +1,9 @@
 use {
     crate::{
+        authentication_middleware::InnerAuthentication,
         entities::{prelude::*, tracker::DisplayRangeUnit, *},
         error::{MapToErr, ToErr},
         update_value::{UpdateOption, UpdateValue},
-        user::SessionUser,
         AppData,
     },
     actix_web::{
@@ -141,7 +141,7 @@ impl DisplayRange {
 
 impl tracker::Model {
     pub async fn get_using_job(
-        user: &SessionUser,
+        user: &InnerAuthentication,
         job: Option<u32>,
         tracker: Option<u32>,
     ) -> Result<(Option<job::Model>, u32), Error> {
@@ -177,7 +177,7 @@ impl tracker::Model {
     /// boolean indicating wether tracker is the active tracker of the job or not
     pub async fn check_owner(
         &self,
-        user: &SessionUser,
+        user: &InnerAuthentication,
         job: Option<&job::Model>,
     ) -> Result<bool, Error> {
         if let Some(job) = &job {
@@ -308,7 +308,7 @@ pub struct ExtendedTracker {
 
 impl ExtendedTracker {
     pub async fn create(
-        user: &SessionUser,
+        user: &InnerAuthentication,
         new_tracker: NewTracker,
         job: Option<u32>,
     ) -> Result<Self, Error> {
@@ -337,7 +337,7 @@ impl ExtendedTracker {
     }
 
     pub async fn create_many(
-        user: &SessionUser,
+        user: &InnerAuthentication,
         new_trackers: Vec<NewTracker>,
         job: Option<u32>,
     ) -> Result<Vec<Self>, Error> {
@@ -373,7 +373,11 @@ impl ExtendedTracker {
         Ok(trackers)
     }
 
-    pub async fn get(id: Option<u32>, job: Option<u32>, user: &SessionUser) -> Result<Self, Error> {
+    pub async fn get(
+        id: Option<u32>,
+        job: Option<u32>,
+        user: &InnerAuthentication,
+    ) -> Result<Self, Error> {
         let (job, id) = tracker::Model::get_using_job(user, job, id).await?;
 
         let tracker = Tracker::find_by_id(id)
@@ -392,7 +396,7 @@ impl ExtendedTracker {
     pub async fn get_with_time_worked(
         id: Option<u32>,
         job: Option<u32>,
-        user: &SessionUser,
+        user: &InnerAuthentication,
         timezone: Tz,
     ) -> Result<Self, Error> {
         let mut tracker = Self::get(id, job, user).await?;
@@ -409,7 +413,10 @@ impl ExtendedTracker {
         Ok(tracker)
     }
 
-    pub async fn get_many(user: &SessionUser, job: Option<u32>) -> Result<Vec<Self>, Error> {
+    pub async fn get_many(
+        user: &InnerAuthentication,
+        job: Option<u32>,
+    ) -> Result<Vec<Self>, Error> {
         let (query, active_tracker) = match job {
             Some(job) => {
                 let job = Job::find_by_id(job)
@@ -510,7 +517,7 @@ impl NewTracker {
     }
 
     pub fn get_parent(
-        user: &SessionUser,
+        user: &InnerAuthentication,
         job: Option<&job::Model>,
     ) -> Result<(Option<u32>, Option<u32>), Error> {
         let (owner, job) = match job {

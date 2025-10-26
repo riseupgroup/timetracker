@@ -1,34 +1,14 @@
 use {
-    crate::error::ToErr,
-    actix_session::Session,
+    crate::{error::ToErr, AppData, Authentication},
     actix_web::{
-        error::ErrorUnauthorized,
         get,
         http::header,
         post,
         web::{self},
         Error, HttpRequest, HttpResponse, Responder,
     },
-    serde::{Deserialize, Serialize},
+    serde::Deserialize,
 };
-
-use crate::AppData;
-
-#[derive(Serialize, Deserialize)]
-pub struct SessionUser {
-    pub id: u32,
-    pub name: String,
-}
-
-impl std::convert::TryFrom<&Session> for SessionUser {
-    type Error = Error;
-    fn try_from(session: &Session) -> Result<SessionUser, Error> {
-        match session.get::<SessionUser>("user")? {
-            Some(id) => Ok(id),
-            None => Err(ErrorUnauthorized("Not logged in")),
-        }
-    }
-}
 
 #[get("/auth")]
 async fn auth_redirect() -> impl Responder {
@@ -48,7 +28,7 @@ struct AuthServerId {
 #[get("/auth/auth_server")]
 async fn auth_server_login(
     req: HttpRequest,
-    session: Session,
+    auth: Authentication,
     id: web::Query<AuthServerId>,
 ) -> Result<impl Responder, Error> {
     match id.into_inner().id {
@@ -59,15 +39,7 @@ async fn auth_server_login(
                 .await
                 .to_err()?;
 
-            session
-                .insert(
-                    "user",
-                    SessionUser {
-                        id: user.id,
-                        name: user.display_name,
-                    },
-                )
-                .to_err()?;
+            auth.set(user.id, user.display_name);
 
             let mut response = HttpResponse::Found();
             match req.cookie("path") {
@@ -86,18 +58,18 @@ async fn auth_server_login(
 }
 
 #[get("/auth/user")]
-async fn get_user(session: Session) -> Result<impl Responder, Error> {
-    SessionUser::try_from(&session).map(|user| HttpResponse::Ok().json(user))
+async fn get_user(auth: Authentication) -> Result<impl Responder, Error> {
+    auth.take().map(|user| HttpResponse::Ok().json(user))
 }
 
 #[post("/auth/logout")]
-async fn logout(session: Session) -> Result<impl Responder, Error> {
-    session.remove("user");
+async fn logout(auth: Authentication) -> Result<impl Responder, Error> {
+    auth.unset();
     Ok(HttpResponse::Ok().finish())
 }
 
 #[get("/auth/users/{id}/picture")]
-async fn get_profile_picture(id: web::Path<i32>) -> Result<impl Responder, Error> {
+async fn get_profile_picture(id: web::Path<u32>) -> Result<impl Responder, Error> {
     let id = id.into_inner();
     Ok(HttpResponse::PermanentRedirect()
         .append_header((

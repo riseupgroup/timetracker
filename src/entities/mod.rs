@@ -2,6 +2,7 @@
 
 pub mod prelude;
 
+pub mod api_key;
 pub mod job;
 pub mod timeslot;
 pub mod tracker;
