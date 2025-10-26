@@ -25,7 +25,11 @@
     </FloatingLabelInput>
     <InputAddon class="border-gray-300 dark:border-gray-600 {classBackground}">
         <button
-            class="-mx-3 inline-flex items-center px-3 {value==""?"cursor-default":(disabled?"cursor-not-allowed":"")}"
+            class="-mx-3 inline-flex items-center px-3 {((value, disabled) => {
+                if (value == '') return 'cursor-default';
+                if (disabled) return 'cursor-not-allowed';
+                return '';
+            })(value, disabled)}"
             style="min-height: calc(1.625rem + 1.25em)"
             on:click={() => {
                 if (!disabled) value = "";

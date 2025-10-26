@@ -31,11 +31,7 @@
     export let searchParam: string = "search";
     export let pageSize: number = 100;
 
-    export let fields: [
-        string,
-        (x: T) => string | Writable<string>,
-        ((x: T, mouseClick: MouseClick) => void) | null
-    ][];
+    export let fields: [string, (x: T) => string | Writable<string>, ((x: T, mouseClick: MouseClick) => void) | null][];
     export let actions: [string, (x: T, mouseClick: MouseClick) => void][] | null = null;
     export let onRowClick: ((x: T, mouseClick: MouseClick) => void) | null = null;
 
@@ -130,7 +126,7 @@
     }
 
     export function manualUpdate(fn: (oldList: ListResult<T>) => ListResult<T>) {
-        originalList = fn(originalList??new ListResult<T>());
+        originalList = fn(originalList ?? new ListResult<T>());
         refreshList(false);
     }
 
@@ -196,16 +192,10 @@
     <div class="items-center justify-between gap-3 space-y-4 sm:flex sm:space-y-0">
         <div class="flex items-center">
             <Button id="order-button" color="alternative" class="w-fit whitespace-nowrap px-4 py-2">
-                Sort by: {(orderOptions.find(([_x, _y, value]) => value == order) || [
-                    "Unknown"
-                ])[0]}
+                Sort by: {(orderOptions.find(([_x, _y, value]) => value == order) || ["Unknown"])[0]}
                 <ChevronDownOutline size="lg" />
             </Button>
-            <Dropdown
-                class="overflow-hidden rounded-lg bg-gray-50 dark:bg-gray-800"
-                placement="bottom-end"
-                bind:this={orderDropdown}
-            >
+            <Dropdown class="overflow-hidden rounded-lg bg-gray-50 dark:bg-gray-800" placement="bottom-end" bind:this={orderDropdown}>
                 {#each orderOptions as [name, aditional, value]}
                     <DropdownItem on:click={() => setOrder(value)}>{name} {aditional}</DropdownItem>
                 {/each}
@@ -227,12 +217,7 @@
 </div>
 
 {#if list != null && list.items.length > 0}
-    <Table
-        hoverable={true}
-        noborder
-        striped
-        class="mt-6 w-full divide-y divide-gray-200 dark:divide-gray-600"
-    >
+    <Table hoverable={true} noborder striped class="mt-6 w-full divide-y divide-gray-200 dark:divide-gray-600">
         <TableHead class="bg-gray-50 dark:bg-gray-700">
             {#each fields as [header, _]}
                 <TableHeadCell class="whitespace-nowrap p-4 font-normal">{header}</TableHeadCell>
@@ -244,22 +229,26 @@
         <TableBody>
             {#each list.items as item}
                 <TableBodyRow
-                    class="{getClass(item)} {onRowClick!=null?"cursor-pointer":""}"
+                    class="{getClass(item)} {onRowClick != null ? 'cursor-pointer' : ''}"
                     on:click={(e) => onRowClick?.call(null, item, new MouseClick(e))}
                 >
                     {#each fields as [_, field, onClick]}
-                        <SearchTableCell content={field(item)} clickable={onClick!=null} on:click={(e) => onClick?.call(null, item, e.detail)}/>
+                        <SearchTableCell
+                            content={field(item)}
+                            clickable={onClick != null}
+                            on:click={(e) => onClick?.call(null, item, e.detail)}
+                        />
                     {/each}
                     {#if actions != null}
                         <td class="whitespace-nowrap p-4 font-normal">
                             {#each actions as [title, action]}
                                 <button
                                     class="display-inline pr-2 text-primary-600 hover:underline dark:text-primary-500"
-                                    on:mousedown={e => {
+                                    on:mousedown={(e) => {
                                         e.stopPropagation();
                                         action(item, new MouseClick(e));
                                     }}
-                                    on:click={e => e.stopPropagation()}
+                                    on:click={(e) => e.stopPropagation()}
                                 >
                                     {title}
                                 </button>

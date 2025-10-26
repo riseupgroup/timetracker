@@ -9,6 +9,7 @@
     let element: HTMLElement;
     let unsubscriber: Unsubscriber | null;
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
     $: content, update();
 
     function update() {
@@ -19,7 +20,7 @@
         if (typeof content == "string") {
             if (element) element.innerText = content;
         } else {
-            unsubscriber = content.subscribe(text => {
+            unsubscriber = content.subscribe((text) => {
                 if (element) element.innerText = text;
             });
         }
@@ -35,7 +36,7 @@
             e.stopPropagation();
             dispatch("click", new MouseClick(e));
         }}
-        on:click={e => e.stopPropagation()}
+        on:click={(e) => e.stopPropagation()}
     >
         <span class="cursor-pointer hover:underline" bind:this={element}></span>
     </td>

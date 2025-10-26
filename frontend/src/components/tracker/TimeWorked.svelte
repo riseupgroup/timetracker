@@ -10,6 +10,8 @@
     let interval: number | null;
     let updateTimeout: number | null;
     let output: Writable<string> = writable();
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
     $: timeslots, update();
 
     function calculateTimeWorked(timeslots: Timeslot[], now: Date): [number, number, Date | null] {
@@ -18,11 +20,12 @@
         let update: Date | null = null;
         for (let timeslot of timeslots) {
             let start = new Date(timeslot.start);
-            if (filterUnit == null
-                || filterUnit == DisplayRangeUnit[DisplayRangeUnit.Week]
-                || (filterUnit == DisplayRangeUnit[DisplayRangeUnit.Month] && start.getMonth()+1 == filterSecondary)
-                || (filterUnit == DisplayRangeUnit[DisplayRangeUnit.Year] && start.getFullYear() == filterPrimary))
-            {
+            if (
+                filterUnit == null ||
+                filterUnit == DisplayRangeUnit[DisplayRangeUnit.Week] ||
+                (filterUnit == DisplayRangeUnit[DisplayRangeUnit.Month] && start.getMonth() + 1 == filterSecondary) ||
+                (filterUnit == DisplayRangeUnit[DisplayRangeUnit.Year] && start.getFullYear() == filterPrimary)
+            ) {
                 let end;
                 if (timeslot.end == null) {
                     if (start > now) {
@@ -39,7 +42,7 @@
                 time += end.getTime() - start.getTime();
             }
         }
-        return [time, counting, update]
+        return [time, counting, update];
     }
 
     function update() {
@@ -72,15 +75,15 @@
                 counting = unitCounting;
                 updateDate = unitUpdate;
             }
-            output.set(formatDuration(time/1000, counting == 0));
+            output.set(formatDuration(time / 1000, counting == 0));
             if (counting != 0) {
                 interval = setInterval(() => {
                     let newTime = time + (new Date().getTime() - now.getTime()) * counting;
-                    output.set(formatDuration(newTime/1000, false));
+                    output.set(formatDuration(newTime / 1000, false));
                 }, 1000);
             }
             if (updateDate) {
-                updateTimeout = setTimeout(update, Math.max(0, updateDate.getTime() - new Date().getTime()))
+                updateTimeout = setTimeout(update, Math.max(0, updateDate.getTime() - new Date().getTime()));
             }
         } else {
             output.set("-");
@@ -96,7 +99,7 @@
             clearTimeout(updateTimeout);
             updateTimeout = null;
         }
-    })
+    });
 </script>
 
 {$output}

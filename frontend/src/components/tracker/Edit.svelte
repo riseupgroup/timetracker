@@ -18,14 +18,13 @@
     let originalTracker: Tracker | null;
     let tracker: UpdateTracker | null;
 
-    
     export function edit(t: Tracker) {
         originalTracker = t;
         tracker = {
             name: t.name || "",
-            validFrom: t.validFrom!=null?getLocalTimestamp(new Date(t.validFrom)):"",
-            validUntil: t.validUntil!=null?getLocalTimestamp(new Date(t.validUntil)):"",
-            timePensum: t.timePensum!=null?String(t.timePensum):"",
+            validFrom: t.validFrom != null ? getLocalTimestamp(new Date(t.validFrom)) : "",
+            validUntil: t.validUntil != null ? getLocalTimestamp(new Date(t.validUntil)) : "",
+            timePensum: t.timePensum != null ? String(t.timePensum) : "",
             timePensumUnit: t.timePensumUnit,
             displayRangeUnit: t.displayRangeUnit
         };
@@ -35,9 +34,9 @@
         if (tracker != null && originalTracker != null) {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             let updateTracker: any = {};
-            
+
             tracker.name = tracker.name.trim();
-            let name = tracker.name == ""?null:tracker.name;
+            let name = tracker.name == "" ? null : tracker.name;
             if (name != originalTracker.name) updateTracker.name = tracker.name;
 
             let validFrom = null;
@@ -49,20 +48,17 @@
             if (validUntil != originalTracker.validUntil) updateTracker.validUntil = validUntil;
 
             tracker.timePensum = tracker.timePensum.trim();
-            let timePensum = tracker.timePensum == ""?null:Number(tracker.timePensum);
-            if (timePensum != originalTracker.timePensum) updateTracker.timePensum = timePensum
+            let timePensum = tracker.timePensum == "" ? null : Number(tracker.timePensum);
+            if (timePensum != originalTracker.timePensum) updateTracker.timePensum = timePensum;
 
             if (tracker.timePensumUnit != originalTracker.timePensumUnit) updateTracker.timePensumUnit = tracker.timePensumUnit;
             if (tracker.displayRangeUnit != originalTracker.displayRangeUnit) updateTracker.displayRangeUnit = tracker.displayRangeUnit;
 
-            let res = await fetch(
-                originalTracker.resource() + "?tz="+timezone,
-                {
-                    method: "PATCH",
-                    headers: new Headers({ "content-type": "application/json" }),
-                    body: JSON.stringify(updateTracker)
-                }
-            );
+            let res = await fetch(originalTracker.resource() + "?tz=" + timezone, {
+                method: "PATCH",
+                headers: new Headers({ "content-type": "application/json" }),
+                body: JSON.stringify(updateTracker)
+            });
 
             if (res.ok) {
                 tracker = null;
@@ -75,52 +71,37 @@
 </script>
 
 {#if tracker != null}
-    <Modal
-        open={true}
-        on:close={() => (tracker = null)}
-        size="xs"
-        autoclose={false}
-        class="w-full"
-        outsideclose
-    >
+    <Modal open={true} on:close={() => (tracker = null)} size="xs" autoclose={false} class="w-full" outsideclose>
         <div class="flex flex-col space-y-6">
             <h3 class="mb-4 text-xl font-medium text-gray-900 dark:text-white">
-                Edit Tracker {originalTracker != null ? (": " + originalTracker.display()) : ""}
+                Edit Tracker{originalTracker != null ? ": " + originalTracker.display() : ""}
             </h3>
 
-            <InputTrash
-                name="Name"
-                bind:value={tracker.name}
-                classBackground="bg-white dark:bg-gray-800"
-            />
+            <InputTrash name="Name" bind:value={tracker.name} classBackground="bg-white dark:bg-gray-800" />
 
             <Label>
                 Time Pensum Unit
-                <Select class="mt-2" items={
-                    Object.keys(TimePensumUnit).filter(
-                            item => isNaN(Number(item))
-                        ).map(
-                            x => {
-                                return { name: x, value: x };
-                            }
-                        )
-                    } 
-                    bind:value={tracker.timePensumUnit} 
+                <Select
+                    class="mt-2"
+                    items={Object.keys(TimePensumUnit)
+                        .filter((item) => isNaN(Number(item)))
+                        .map((x) => {
+                            return { name: x, value: x };
+                        })}
+                    bind:value={tracker.timePensumUnit}
                 />
             </Label>
 
             <Label>
                 Display Unit
-                <Select class="mt-2" items={
-                    Object.keys(DisplayRangeUnit).filter(
-                            item => isNaN(Number(item))
-                        ).map(
-                            x => {
-                                return { name: x, value: x };
-                            }
-                        )
-                    } 
-                    bind:value={tracker.displayRangeUnit} 
+                <Select
+                    class="mt-2"
+                    items={Object.keys(DisplayRangeUnit)
+                        .filter((item) => isNaN(Number(item)))
+                        .map((x) => {
+                            return { name: x, value: x };
+                        })}
+                    bind:value={tracker.displayRangeUnit}
                 />
             </Label>
 

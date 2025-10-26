@@ -15,7 +15,7 @@ export const browserLanguage = navigator.language || (navigator.languages || ["e
 export enum RowStyle {
     Disabled,
     Underlined,
-    Bold,
+    Bold
 }
 
 export interface Entity {
@@ -37,9 +37,9 @@ export class ListResult<T> {
 }
 
 export type Unit = {
-    start: string,
-    end: string,
-    timeslots: Timeslot[],
+    start: string;
+    end: string;
+    timeslots: Timeslot[];
 };
 
 export enum MouseButton {
@@ -106,40 +106,43 @@ export function getLocalTimestamp(d: Date): string {
 
 export function getWeekNumber(date: Date): number {
     // Copy date so don't modify original
-    let d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+    const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
     // Set to nearest Thursday: current date + 4 - current day number
     // Make Sunday's day number 7
-    d.setDate(d.getDate() + 4 - (d.getDay()||7));
+    d.setDate(d.getDate() + 4 - (d.getDay() || 7));
     // Get first day of year
-    let yearStart = new Date(d.getUTCFullYear(),0,1);
+    const yearStart = new Date(d.getUTCFullYear(), 0, 1);
     // Calculate full weeks to nearest Thursday
-    return Math.ceil(( ( (d.getTime() - yearStart.getTime()) / 86400000) + 1)/7);
+    return Math.ceil(((d.getTime() - yearStart.getTime()) / 86400000 + 1) / 7);
 }
 
 export function getYearFromWeek(date: Date): number {
     // Copy date so don't modify original
-    let d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+    const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
     // Set to nearest Thursday: current date + 4 - current day number
     // Make Sunday's day number 7
-    d.setDate(d.getDate() + 4 - (d.getDay()||7));
+    d.setDate(d.getDate() + 4 - (d.getDay() || 7));
     return d.getUTCFullYear();
 }
 
 export function formatDuration(durationSeconds: number, short: boolean = false): string {
-    let isNegative = durationSeconds < 0;
+    const isNegative = durationSeconds < 0;
     durationSeconds = Math.abs(durationSeconds);
-    let hours = Math.floor(durationSeconds / 3600);
-    let minutes = Math.floor((durationSeconds % 3600) / 60);
-    let seconds = Math.floor(durationSeconds % 60);
+    const hours = Math.floor(durationSeconds / 3600);
+    const minutes = Math.floor((durationSeconds % 3600) / 60);
+    const seconds = Math.floor(durationSeconds % 60);
     if (short) {
-        if (durationSeconds == 0) { return "-"; }
+        if (durationSeconds == 0) return "-";
         let output = "";
         if (hours > 0) output += hours + "h ";
         if (minutes > 0) output += minutes + "m ";
         if (seconds > 0) output += seconds + "s ";
-        return isNegative?"-":"" + output.trim();
+        return isNegative ? "-" : "" + output.trim();
     }
-    return isNegative?"-":"" + hours + "h " + minutes.toString().padStart(2, "0") + "m " + seconds.toString().padStart(2, "0") + "s";
+
+    if (isNegative) return "-";
+
+    return "" + hours + "h " + minutes.toString().padStart(2, "0") + "m " + seconds.toString().padStart(2, "0") + "s";
 }
 
 export class Job implements Entity {
@@ -165,7 +168,7 @@ export class Job implements Entity {
         return this.companyName || "Job " + this.primary();
     }
     rowStyle(): RowStyle | string | null {
-        return this.disabled?RowStyle.Disabled:null;
+        return this.disabled ? RowStyle.Disabled : null;
     }
 }
 
@@ -188,7 +191,7 @@ export class Tracker implements Entity {
     }
 
     resource(): string {
-        return this.job?("/api/jobs/" + this.job + "/trackers/" + this.primary()):"/api/trackers/" + this.primary();
+        return this.job ? "/api/jobs/" + this.job + "/trackers/" + this.primary() : "/api/trackers/" + this.primary();
     }
 
     resourceName(): string {
@@ -200,12 +203,12 @@ export class Tracker implements Entity {
     }
 
     rowStyle(): RowStyle | string | null {
-        let validFrom = new Date(this.validFrom || "");
-        let validUntil = new Date(this.validUntil || "");
-        let now = new Date();
-        let disabled = validFrom > now || validUntil < now;
+        const validFrom = new Date(this.validFrom || "");
+        const validUntil = new Date(this.validUntil || "");
+        const now = new Date();
+        const disabled = validFrom > now || validUntil < now;
         if (disabled) return RowStyle.Disabled;
-        if (this.job!=null && this.isActive) return RowStyle.Bold;
+        if (this.job != null && this.isActive) return RowStyle.Bold;
         return null;
     }
 }
@@ -215,14 +218,14 @@ export enum TimePensumUnit {
     Week,
     Month,
     Year,
-    None,
+    None
 }
 
 // Ordering has to be the same as TimePensumUnit
 export enum DisplayRangeUnit {
     Week,
     Month,
-    Year,
+    Year
 }
 
 export class Timeslot implements Entity {
@@ -235,7 +238,7 @@ export class Timeslot implements Entity {
     primary(): number {
         return this.id;
     }
-    
+
     resource(): string {
         return "/api/timeslots/" + this.primary();
     }
@@ -243,13 +246,13 @@ export class Timeslot implements Entity {
     resourceName(): string {
         return "timeslot";
     }
-    
+
     display(): string {
         return this.comment || "Timeslot " + this.primary();
     }
-    
+
     rowStyle(): RowStyle | string | null {
-        return this.end==null?RowStyle.Bold:null;
+        return this.end == null ? RowStyle.Bold : null;
     }
 }
 
@@ -283,7 +286,7 @@ export class ApiKey implements Entity {
     }
 
     rowStyle(): RowStyle | string | null {
-        return this.disabled?RowStyle.Disabled:null;
+        return this.disabled ? RowStyle.Disabled : null;
     }
 }
 

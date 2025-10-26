@@ -31,8 +31,7 @@
         toNewApiKey(): NewApiKey {
             let newApiKey = new NewApiKey();
             newApiKey.name = this.name.length > 0 ? this.name : null;
-            newApiKey.validUntil =
-                this.validUntil != "" ? new Date(this.validUntil).toISOString() : null;
+            newApiKey.validUntil = this.validUntil != "" ? new Date(this.validUntil).toISOString() : null;
             newApiKey.disabled = this.disabled;
             return newApiKey;
         }
@@ -71,11 +70,7 @@
     <div class="flex flex-col space-y-6">
         <h3 class="mb-4 text-xl font-medium text-gray-900 dark:text-white">Create API key</h3>
 
-        <InputTrash
-            name="Name"
-            bind:value={newApiKeyInputs.name}
-            classBackground="bg-white dark:bg-gray-800"
-        />
+        <InputTrash name="Name" bind:value={newApiKeyInputs.name} classBackground="bg-white dark:bg-gray-800" />
 
         <InputTrash
             name="Valid until"
@@ -84,9 +79,7 @@
             classBackground="bg-white dark:bg-gray-800"
         />
 
-        <Toggle bind:checked={newApiKeyInputs.disabled} size="small" class="cursor-pointer"
-            >Disable</Toggle
-        >
+        <Toggle bind:checked={newApiKeyInputs.disabled} size="small" class="cursor-pointer">Disable</Toggle>
 
         <div class="flex justify-end space-x-2">
             <Button

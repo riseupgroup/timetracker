@@ -52,7 +52,7 @@
     }
 
     async function submit() {
-        let res = await fetch(job?("/api/jobs/" + job + "/trackers"):"/api/trackers" , {
+        let res = await fetch(job ? "/api/jobs/" + job + "/trackers" : "/api/trackers", {
             method: "POST",
             headers: { "content-type": "application/json" },
             body: JSON.stringify(newTrackerInputs.toNewTracker())
@@ -71,12 +71,8 @@
 <Modal bind:open={isOpen} size="xs" autoclose={false} class="w-full" outsideclose>
     <div class="flex flex-col space-y-6">
         <h3 class="mb-4 text-xl font-medium text-gray-900 dark:text-white">Create Tracker</h3>
-        
-        <InputTrash
-            name="Name"
-            bind:value={newTrackerInputs.name}
-            classBackground="bg-white dark:bg-gray-800"
-        />
+
+        <InputTrash name="Name" bind:value={newTrackerInputs.name} classBackground="bg-white dark:bg-gray-800" />
 
         <InputTrash
             name="Time Pensum (Minutes)"
@@ -87,31 +83,27 @@
 
         <Label>
             Time Pensum Unit
-            <Select class="mt-2" items={
-                Object.keys(TimePensumUnit).filter(
-                        item => isNaN(Number(item))
-                    ).map(
-                        x => {
-                            return { name: x, value: x };
-                        }
-                    )
-                }
-                bind:value={newTrackerInputs.timePensumUnit} 
+            <Select
+                class="mt-2"
+                items={Object.keys(TimePensumUnit)
+                    .filter((item) => isNaN(Number(item)))
+                    .map((x) => {
+                        return { name: x, value: x };
+                    })}
+                bind:value={newTrackerInputs.timePensumUnit}
             />
         </Label>
 
         <Label>
             Display Unit
-            <Select class="mt-2" items={
-                Object.keys(DisplayRangeUnit).filter(
-                        item => isNaN(Number(item))
-                    ).map(
-                        x => {
-                            return { name: x, value: x };
-                        }
-                    )
-                }
-                bind:value={newTrackerInputs.displayRangeUnit} 
+            <Select
+                class="mt-2"
+                items={Object.keys(DisplayRangeUnit)
+                    .filter((item) => isNaN(Number(item)))
+                    .map((x) => {
+                        return { name: x, value: x };
+                    })}
+                bind:value={newTrackerInputs.displayRangeUnit}
             />
         </Label>
 

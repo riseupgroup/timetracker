@@ -65,32 +65,11 @@
 <Modal bind:open={isOpen} size="xs" autoclose={false} class="w-full" outsideclose>
     <div class="flex flex-col space-y-6">
         <h3 class="mb-4 text-xl font-medium text-gray-900 dark:text-white">Create Job</h3>
-        <InputTrash
-            name="Company Name"
-            bind:value={newJobInputs.companyName}
-            classBackground="bg-white dark:bg-gray-800"
-        />
-        <InputTrash
-            name="Company Logo"
-            bind:value={newJobInputs.companyLogo}
-            classBackground="bg-white dark:bg-gray-800"
-        />
-        <InputTrash
-            name="Description"
-            bind:value={newJobInputs.description}
-            classBackground="bg-white dark:bg-gray-800"
-        />
-        <InputTrash
-            name="Name"
-            bind:value={newJobInputs.name}
-            classBackground="bg-white dark:bg-gray-800"
-        />
-        <Toggle
-            bind:checked={newJobInputs.disabled}
-            size="small"
-            color="red"
-            class="cursor-pointer">Disable Job</Toggle
-        >
+        <InputTrash name="Company Name" bind:value={newJobInputs.companyName} classBackground="bg-white dark:bg-gray-800" />
+        <InputTrash name="Company Logo" bind:value={newJobInputs.companyLogo} classBackground="bg-white dark:bg-gray-800" />
+        <InputTrash name="Description" bind:value={newJobInputs.description} classBackground="bg-white dark:bg-gray-800" />
+        <InputTrash name="Name" bind:value={newJobInputs.name} classBackground="bg-white dark:bg-gray-800" />
+        <Toggle bind:checked={newJobInputs.disabled} size="small" color="red" class="cursor-pointer">Disable Job</Toggle>
         <div class="flex justify-end space-x-2">
             <Button
                 on:click={() => {

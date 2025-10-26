@@ -28,10 +28,7 @@
         }
     </style>
     <div class="custom-tooltip" style="display: {open ? 'block' : 'none'}">
-        <div
-            role="tooltip"
-            class="tooltip rounded-md bg-gray-900 px-3 py-2 text-sm font-medium text-white shadow-md dark:bg-gray-700"
-        >
+        <div role="tooltip" class="tooltip rounded-md bg-gray-900 px-3 py-2 text-sm font-medium text-white shadow-md dark:bg-gray-700">
             <slot name="content" />
         </div>
         <div class="arrow bg-gray-900 dark:bg-gray-700"></div>

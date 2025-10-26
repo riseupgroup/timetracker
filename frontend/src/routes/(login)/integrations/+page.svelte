@@ -20,17 +20,9 @@
         ["Last used", "(Old to New)", "LastUsedRev"]
     ];
 
-    let fields: [
-        string,
-        (k: ApiKey) => string,
-        ((k: ApiKey, mouseClick: MouseClick) => void) | null
-    ][] = [
+    let fields: [string, (k: ApiKey) => string, ((k: ApiKey, mouseClick: MouseClick) => void) | null][] = [
         ["Name", (k) => k.display(), null],
-        [
-            "Valid until",
-            (k) => (k.validUntil ? new Date(k.validUntil).toLocaleDateString() : "never expires"),
-            null
-        ],
+        ["Valid until", (k) => (k.validUntil ? new Date(k.validUntil).toLocaleDateString() : "never expires"), null],
         [
             "Last used",
             (k) => {
@@ -42,7 +34,7 @@
                 let hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
                 let minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
 
-                if (days >= 5*7) {
+                if (days >= 5 * 7) {
                     return date.toLocaleDateString();
                 } else if (days > 7) {
                     return Math.floor(days / 7) + " weeks ago";
@@ -96,13 +88,11 @@
     ];
 
     function edit(key: ApiKey) {
-        editKey.$$.ctx[editKey.$$.props.edit](key);
+        editKey.edit(key);
     }
 
     function itemSearch(x: ApiKey, s: string): boolean {
-        return (
-            x.name?.toLowerCase().includes(s) || x.display().toLowerCase().includes(s)
-        );
+        return x.name?.toLowerCase().includes(s) || x.display().toLowerCase().includes(s);
     }
 
     function itemCompare(a: ApiKey, b: ApiKey, order: string): number {
@@ -163,9 +153,7 @@
             on:click={() => (isCreateOpen = true)}>+new</button
         ></Heading
     >
-    <span class="text-base font-normal text-gray-500 dark:text-gray-400"
-        >This is a list of all your api keys</span
-    >
+    <span class="text-base font-normal text-gray-500 dark:text-gray-400">This is a list of all your api keys</span>
 </SearchTable>
 
 <Delete
@@ -184,11 +172,5 @@
     }}
 />
 
-<Create
-    bind:isOpen={isCreateOpen}
-    on:created={() => keysTable.$$.ctx[keysTable.$$.props.refreshList](true)}
-/>
-<Edit
-    bind:this={editKey}
-    on:update={() => keysTable.$$.ctx[keysTable.$$.props.refreshList](true)}
-/>
+<Create bind:isOpen={isCreateOpen} on:created={() => keysTable.refreshList(true)} />
+<Edit bind:this={editKey} on:update={() => keysTable.refreshList(true)} />

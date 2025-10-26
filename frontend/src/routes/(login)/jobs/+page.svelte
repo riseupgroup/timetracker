@@ -35,16 +35,20 @@
         ["Date", "(New to Old)", "Date"],
         ["Date", "(Old to New)", "DateRev"],
         ["Company name", "(A-Z)", "Company"],
-        ["Company name", "(Z-A)", "CompanyRev"],
+        ["Company name", "(Z-A)", "CompanyRev"]
     ];
 
     let fields: [string, (item: Job) => string, ((item: Job, mouseClick: MouseClick) => void) | null][] = [
         ["Company", (item) => item.companyName || "-", null],
         ["Description", (item) => item.description || "-", null],
         ["Name", (item) => item.name || "-", null],
-        ["Active Tracker", (item) => item.activeTracker?.display() || "-", (item, mouseClick) => {
-            if (item.activeTracker != null) mouseClick.goto("/jobs/" + item.id + "/trackers/" + item.activeTracker.id);
-        }]
+        [
+            "Active Tracker",
+            (item) => item.activeTracker?.display() || "-",
+            (item, mouseClick) => {
+                if (item.activeTracker != null) mouseClick.goto("/jobs/" + item.id + "/trackers/" + item.activeTracker.id);
+            }
+        ]
     ];
 
     let onRowClick = (item: Job, click: MouseClick) => {
@@ -53,21 +57,27 @@
 
     let actions: [string, (item: Job, click: MouseClick) => void][] = [
         ["Details", onRowClick],
-        ["Edit", (item, _click) => {
-            editJob.edit(item, null);
-        }],
-        ["Delete", (item, _click) => {
-            deleteJob = item;
-            isDeleteOpen = true;
-        }]
+        [
+            "Edit",
+            (item, _) => {
+                editJob.edit(item, null);
+            }
+        ],
+        [
+            "Delete",
+            (item, _) => {
+                deleteJob = item;
+                isDeleteOpen = true;
+            }
+        ]
     ];
 
     function itemSearch(x: Job, s: string): boolean {
         return (
-            x.name?.toLowerCase().includes(s)
-            || x.companyName?.toLocaleLowerCase().includes(s)
-            || x.description?.toLocaleLowerCase().includes(s)
-            || false
+            x.name?.toLowerCase().includes(s) ||
+            x.companyName?.toLocaleLowerCase().includes(s) ||
+            x.description?.toLocaleLowerCase().includes(s) ||
+            false
         );
     }
 
@@ -88,7 +98,6 @@
         }
         return 0;
     }
-
 </script>
 
 <SearchTable
@@ -104,46 +113,47 @@
     {itemSearch}
     {itemCompare}
 >
-    <Heading
-        tag="h1"
-        class="-ml-0.25 mb-2 text-4xl font-semibold text-gray-900 dark:text-gray-50"
-    >
-        Jobs <button
-            class="cursor-pointer text-primary-600 hover:underline dark:text-primary-500"
-            on:click={() => (isCreateOpen = true)}>+new</button
+    <Heading tag="h1" class="-ml-0.25 mb-2 text-4xl font-semibold text-gray-900 dark:text-gray-50">
+        Jobs <button class="cursor-pointer text-primary-600 hover:underline dark:text-primary-500" on:click={() => (isCreateOpen = true)}
+            >+new</button
         >
     </Heading>
-    <span class="text-base font-normal text-gray-500 dark:text-gray-400">
-        This is a list of all jobs / collections
-    </span>
+    <span class="text-base font-normal text-gray-500 dark:text-gray-400"> This is a list of all jobs / collections </span>
 </SearchTable>
 
-<Delete bind:isOpen={isDeleteOpen} bind:entity={deleteJob} on:deleted={(e) => {
-    jobsTable.manualUpdate((list) => {
-        list.items = list.items.filter(item => item.id != e.detail.id);
-        list.count--;
-        return list;
-    })
-}} />
+<Delete
+    bind:isOpen={isDeleteOpen}
+    bind:entity={deleteJob}
+    on:deleted={(e) => {
+        jobsTable.manualUpdate((list) => {
+            list.items = list.items.filter((item) => item.id != e.detail.id);
+            list.count--;
+            return list;
+        });
+    }}
+/>
 
 <Create
     bind:isOpen={isCreateOpen}
     on:created={(e) => {
         jobsTable.manualUpdate((list) => {
             list.items.push(e.detail);
-            list.count++;;
+            list.count++;
             return list;
         });
     }}
 />
 
-<Edit bind:this={editJob} on:update={(e) => {
-    jobsTable.manualUpdate((list) => {
-        let updatedJob = e.detail;
-        let index = list.items.findIndex(item => item.id === updatedJob.id);
-        if (index !== -1) {
-            list.items[index] = updatedJob;
-        }
-        return list;
-    })
-}}/>
+<Edit
+    bind:this={editJob}
+    on:update={(e) => {
+        jobsTable.manualUpdate((list) => {
+            let updatedJob = e.detail;
+            let index = list.items.findIndex((item) => item.id === updatedJob.id);
+            if (index !== -1) {
+                list.items[index] = updatedJob;
+            }
+            return list;
+        });
+    }}
+/>

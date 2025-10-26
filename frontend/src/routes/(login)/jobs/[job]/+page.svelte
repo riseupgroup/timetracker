@@ -3,10 +3,7 @@
     import { onMount } from "svelte";
     import { browserLanguage, formatDuration, Job, ListResult, MouseClick, TimePensumUnit, timezone, Tracker } from "../../../../app";
     import { Heading, Badge } from "flowbite-svelte";
-    import {
-        EditSolid,
-        TrashBinSolid
-    } from "flowbite-svelte-icons";
+    import { EditSolid, TrashBinSolid } from "flowbite-svelte-icons";
     import Delete from "../../../../components/Delete.svelte";
     import SmallCard from "../../../../components/SmallCard.svelte";
     import SearchTable from "../../../../components/SearchTable.svelte";
@@ -37,7 +34,7 @@
         }
     }
 
-    async function fetchTrackers(): Promise<ListResult<Tracker>>{
+    async function fetchTrackers(): Promise<ListResult<Tracker>> {
         let res = await fetch("/api/jobs/" + paramJob + "/trackers");
         if (res.ok) {
             let trackers: ListResult<Tracker> = new ListResult();
@@ -61,23 +58,27 @@
         ["Date", "(New to Old)", "Date"],
         ["Date", "(Old to New)", "DateRev"],
         ["Name", "(A-Z)", "Name"],
-        ["Name", "(Z-A)", "NameRev"],
+        ["Name", "(Z-A)", "NameRev"]
     ];
 
     let fields: [string, (item: Tracker) => string, ((item: Tracker, mouseClick: MouseClick) => void) | null][] = [
         ["Name", (item) => item.display(), null],
-        ["TimePensum", (item) => {
-            if (item.timePensum) {
-                return formatDuration(item.timePensum * 60, true) + (item.timePensumUnit?" / " + item.timePensumUnit.toString():"");
-            } else if (item.timePensumUnit != TimePensumUnit[TimePensumUnit.None]) {
-                return item.timePensumUnit.toString();
-            } else {
-                return "None";
-            }
-        }, null],
-        ["ValidFrom", (item) => item.validFrom?new Date(item.validFrom).toLocaleString(browserLanguage):"-", null],
-        ["ValidUntil", (item) => item.validUntil?new Date(item.validUntil).toLocaleString(browserLanguage):"-", null],
-        ["Created", (item) => item.created?new Date(item.created).toLocaleString(browserLanguage):"-", null],
+        [
+            "TimePensum",
+            (item) => {
+                if (item.timePensum) {
+                    return formatDuration(item.timePensum * 60, true) + (item.timePensumUnit ? " / " + item.timePensumUnit.toString() : "");
+                } else if (item.timePensumUnit != TimePensumUnit[TimePensumUnit.None]) {
+                    return item.timePensumUnit.toString();
+                } else {
+                    return "None";
+                }
+            },
+            null
+        ],
+        ["ValidFrom", (item) => (item.validFrom ? new Date(item.validFrom).toLocaleString(browserLanguage) : "-"), null],
+        ["ValidUntil", (item) => (item.validUntil ? new Date(item.validUntil).toLocaleString(browserLanguage) : "-"), null],
+        ["Created", (item) => (item.created ? new Date(item.created).toLocaleString(browserLanguage) : "-"), null]
     ];
 
     let onRowClick = (item: Tracker, click: MouseClick) => {
@@ -86,19 +87,23 @@
 
     let actions: [string, (item: Tracker, click: MouseClick) => void][] = [
         ["Details", onRowClick],
-        ["Edit", (item, _click) => {
-            editTracker.edit(item);
-        }],
-        ["Delete", (item, _click) => {
-            deleteTracker = item;
-            isDeleteTrackerOpen = true;
-        }]
+        [
+            "Edit",
+            (item, _click) => {
+                editTracker.edit(item);
+            }
+        ],
+        [
+            "Delete",
+            (item, _click) => {
+                deleteTracker = item;
+                isDeleteTrackerOpen = true;
+            }
+        ]
     ];
 
     function itemSearch(x: Tracker, s: string): boolean {
-        return (
-            x.name?.toLowerCase().includes(s) || false
-        );
+        return x.name?.toLowerCase().includes(s) || false;
     }
 
     function itemCompare(a: Tracker, b: Tracker, order: string): number {
@@ -121,14 +126,14 @@
 </script>
 
 {#if job != null}
-    <SmallCard class="mt-4 mb-8 w-full">
+    <SmallCard class="mb-8 mt-4 w-full">
         <div class="float-right flex flex-row gap-2">
             <button
                 class="inline-flex rounded-md border border-gray-500 px-2 py-1 text-gray-500 outline-none focus-within:ring-4 focus-within:ring-gray-300 hover:bg-gray-200 dark:border-gray-400 dark:text-gray-400 dark:focus-within:ring-gray-600 dark:hover:bg-gray-700"
                 on:click={() => {
                     if (job == null) return;
                     let trackers = trackersTable.$$.ctx[trackersTable.$$.props.originalList].items;
-                    editJob.edit(job, trackers)
+                    editJob.edit(job, trackers);
                 }}
             >
                 <EditSolid class="h-5 w-5 sm:me-2" /><span class="hidden sm:block">Edit</span>
@@ -147,8 +152,16 @@
             {job.description}
         {/if}
         <hr class="mb-4 mt-4" />
-        {#if job.name}{job.name} - {/if}
-        Added on {new Date(job.created).toLocaleString(browserLanguage, { year: "numeric", month: "short", day: "numeric" })} at
+        {#if job.name}
+            {job.name} -
+        {/if}
+        Added on
+        {new Date(job.created).toLocaleString(browserLanguage, {
+            year: "numeric",
+            month: "short",
+            day: "numeric"
+        })}
+        at
         {new Date(job.created).toLocaleTimeString(browserLanguage)}
         <div class="float-right">
             {#if job.disabled}
@@ -162,7 +175,11 @@
             Active tracker:
             <span class="float-right">
                 {#if job.activeTracker}
-                    <button class="hover:underline" on:click={(e) => new MouseClick(e).goto("/jobs/" + job?.id + "/trackers/" + job?.activeTracker?.id)}>{job.activeTracker.display()}</button>
+                    <button
+                        class="hover:underline"
+                        on:click={(e) => new MouseClick(e).goto("/jobs/" + job?.id + "/trackers/" + job?.activeTracker?.id)}
+                        >{job.activeTracker.display()}</button
+                    >
                 {:else}
                     None
                 {/if}
@@ -188,56 +205,53 @@
         {itemSearch}
         {itemCompare}
     >
-        <Heading
-            tag="h2"
-            class="-ml-0.25 mb-2 text-4xl font-semibold text-gray-900 dark:text-gray-50"
-        >
+        <Heading tag="h2" class="-ml-0.25 mb-2 text-4xl font-semibold text-gray-900 dark:text-gray-50">
             Trackers <button
                 class="cursor-pointer text-primary-600 hover:underline dark:text-primary-500"
                 on:click={() => (isCreateTrackerOpen = true)}>+new</button
             >
         </Heading>
-        <span class="text-base font-normal text-gray-500 dark:text-gray-400">
-            This is a list of all trackers for this job
-        </span>
+        <span class="text-base font-normal text-gray-500 dark:text-gray-400"> This is a list of all trackers for this job </span>
     </SearchTable>
 
-    <Delete bind:isOpen={isDeleteTrackerOpen} bind:entity={deleteTracker} on:deleted={(e) => {
-        trackersTable.manualUpdate((list) => {
-            list.items = list.items.filter(item => item.id != e.detail.id);
-            list.count--;
-            return list;
-        });
-    }} />
+    <Delete
+        bind:isOpen={isDeleteTrackerOpen}
+        bind:entity={deleteTracker}
+        on:deleted={(e) => {
+            trackersTable.manualUpdate((list) => {
+                list.items = list.items.filter((item) => item.id != e.detail.id);
+                list.count--;
+                return list;
+            });
+        }}
+    />
 
     <Create
         bind:isOpen={isCreateTrackerOpen}
         on:created={(e) => {
             trackersTable.manualUpdate((list) => {
                 list.items.push(e.detail);
-                list.count++;;
+                list.count++;
                 return list;
             });
         }}
     />
 
+    <Edit bind:this={editJob} on:update={(e) => (job = e.detail)} />
 
-    <Edit bind:this={editJob} on:update={(e) => job = e.detail} />
+    <Delete bind:isOpen={isDeleteOpen} entity={job} on:deleted={() => (window.location.href = "/jobs")} />
 
-    <Delete
-        bind:isOpen={isDeleteOpen}
-        entity={job}
-        on:deleted={() => (window.location.href = "/jobs")}
+    <EditTracker
+        bind:this={editTracker}
+        on:update={(e) => {
+            trackersTable.manualUpdate((list) => {
+                let updatedTracker = e.detail;
+                let index = list.items.findIndex((item) => item.id === updatedTracker.id);
+                if (index !== -1) {
+                    list.items[index] = updatedTracker;
+                }
+                return list;
+            });
+        }}
     />
-
-    <EditTracker bind:this={editTracker} on:update={(e) => {
-        trackersTable.manualUpdate((list) => {
-            let updatedTracker = e.detail;
-            let index = list.items.findIndex(item => item.id === updatedTracker.id);
-            if (index !== -1) {
-                list.items[index] = updatedTracker;
-            }
-            return list;
-        });
-    }} />
 {/if}

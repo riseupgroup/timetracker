@@ -45,11 +45,7 @@
 
 <Navbar color="dark" class="border-b border-gray-200 dark:border-gray-600">
     <NavBrand href="/" class="order-0 flex-grow">
-        <img
-            src="https://github.com/riseupgroup.png"
-            class="me-3 h-6 w-6 sm:h-9 sm:w-9"
-            alt="RiseUpGroup Logo"
-        />
+        <img src="https://github.com/riseupgroup.png" class="me-3 h-6 w-6 sm:h-9 sm:w-9" alt="RiseUpGroup Logo" />
         <span class="self-center whitespace-nowrap text-xl font-semibold dark:text-white">
             TimeTracker <span class="hidden sm:inline-block"> | RiseUpGroup</span>
         </span>
@@ -60,7 +56,8 @@
             on:click={(mouseEvent) => {
                 mouseEvent.preventDefault();
                 new MouseClick(mouseEvent).goto("/");
-            }}>Home</NavLi>
+            }}>Home</NavLi
+        >
         {#if user != null}
             <NavLi
                 href="/jobs"
@@ -91,11 +88,7 @@
     </NavUl>
     <div class="order-1 mx-4 flex flex-row md:order-2">
         {#if user != null}
-            <Avatar
-                class="cursor-pointer"
-                id="avatar-menu"
-                src={"/auth/users/" + user.id + "/picture"}
-            />
+            <Avatar class="cursor-pointer" id="avatar-menu" src={"/auth/users/" + user.id + "/picture"} />
             <Dropdown placement="bottom-end" class="w-40" triggeredBy="#avatar-menu">
                 <DropdownHeader>
                     <span class="block text-sm">{user.name}</span>

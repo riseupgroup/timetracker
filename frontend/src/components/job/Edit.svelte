@@ -21,7 +21,7 @@
 
     /**
      * Opens the edit modal for a job
-     * 
+     *
      * @param oldJob The job to edit
      * @param trackers The trackers to display in the active tracker select
      */
@@ -40,7 +40,7 @@
             companyLogo: oldJob.companyLogo || "",
             description: oldJob.description || "",
             disabled: oldJob.disabled,
-            activeTracker: oldJob.activeTracker != null?oldJob.activeTracker.id:0,
+            activeTracker: oldJob.activeTracker != null ? oldJob.activeTracker.id : 0
         };
     }
 
@@ -62,41 +62,40 @@
         if (job != null && originalJob != null) {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             let updateJob: any = {};
-            
+
             job.name = job.name.trim();
-            let name = job.name == ""?null:job.name;
+            let name = job.name == "" ? null : job.name;
             if (name != originalJob.name) updateJob.name = job.name;
 
             job.companyName = job.companyName.trim();
-            let companyName = job.companyName == ""?null:job.companyName;
+            let companyName = job.companyName == "" ? null : job.companyName;
             if (companyName != originalJob.companyName) updateJob.companyName = job.companyName;
 
             job.companyLogo = job.companyLogo.trim();
-            let companyLogo = job.companyLogo == ""?null:job.companyLogo;
+            let companyLogo = job.companyLogo == "" ? null : job.companyLogo;
             if (companyLogo != originalJob.companyLogo) updateJob.companyLogo = job.companyLogo;
 
             job.description = job.description.trim();
-            let description = job.description == ""?null:job.description;
+            let description = job.description == "" ? null : job.description;
             if (description != originalJob.description) updateJob.description = job.description;
 
-            let activeTracker = job.activeTracker==0?null:(job.activeTracker);
-            if (activeTracker != originalJob.activeTracker) updateJob.activeTracker = activeTracker;        
-            
+            let activeTracker = job.activeTracker == 0 ? null : job.activeTracker;
+            if (activeTracker != originalJob.activeTracker) updateJob.activeTracker = activeTracker;
+
             if (job.disabled != originalJob.disabled) updateJob.disabled = job.disabled;
 
-            let res = await fetch(
-                originalJob.resource() + "?tz=" + timezone,
-                {
-                    method: "PATCH",
-                    headers: new Headers({ "content-type": "application/json" }),
-                    body: JSON.stringify(updateJob)
-                }
-            );
+            let res = await fetch(originalJob.resource() + "?tz=" + timezone, {
+                method: "PATCH",
+                headers: new Headers({ "content-type": "application/json" }),
+                body: JSON.stringify(updateJob)
+            });
 
             if (res.ok) {
                 job = null;
                 let resJob = Object.assign(new Job(), await res.json());
-                resJob.activeTracker = resJob.activeTracker != null ? Object.assign(new Tracker(), resJob.activeTracker) : null;
+                if (resJob.activeTracker != null) {
+                    resJob.activeTracker = Object.assign(new Tracker(), resJob.activeTracker);
+                }
                 dispatch("update", resJob);
             } else {
                 alert(await res.text());
@@ -106,38 +105,15 @@
 </script>
 
 {#if job != null}
-    <Modal
-        open={true}
-        on:close={() => (job = null)}
-        size="xs"
-        autoclose={false}
-        class="w-full"
-        outsideclose
-    >
+    <Modal open={true} on:close={() => (job = null)} size="xs" autoclose={false} class="w-full" outsideclose>
         <div class="flex flex-col space-y-6">
             <h3 class="mb-4 text-xl font-medium text-gray-900 dark:text-white">
-                Edit Job {originalJob != null ? (": " + originalJob.display()) : ""}
+                Edit Job{originalJob != null ? ": " + originalJob.display() : ""}
             </h3>
-            <InputTrash
-                name="Company name"
-                bind:value={job.companyName}
-                classBackground="bg-white dark:bg-gray-800"
-            />
-            <InputTrash
-                name="Company logo"
-                bind:value={job.companyLogo}
-                classBackground="bg-white dark:bg-gray-800"
-            />
-            <InputTrash
-                name="Description"
-                bind:value={job.description}
-                classBackground="bg-white dark:bg-gray-800"
-            />
-            <InputTrash
-                name="Name"
-                bind:value={job.name}
-                classBackground="bg-white dark:bg-gray-800"
-            />
+            <InputTrash name="Company name" bind:value={job.companyName} classBackground="bg-white dark:bg-gray-800" />
+            <InputTrash name="Company logo" bind:value={job.companyLogo} classBackground="bg-white dark:bg-gray-800" />
+            <InputTrash name="Description" bind:value={job.description} classBackground="bg-white dark:bg-gray-800" />
+            <InputTrash name="Name" bind:value={job.name} classBackground="bg-white dark:bg-gray-800" />
             <Label>
                 Active Tracker
                 <Select
@@ -148,9 +124,7 @@
                     classBackground="bg-white dark:bg-gray-800"
                 />
             </Label>
-            <Toggle bind:checked={job.disabled} size="small" class="cursor-pointer">
-                Disabled
-            </Toggle>
+            <Toggle bind:checked={job.disabled} size="small" class="cursor-pointer">Disabled</Toggle>
             <div class="flex justify-end space-x-2">
                 <Button on:click={() => (job = null)} outline>Cancel</Button>
                 <Button on:click={submit}>Save</Button>

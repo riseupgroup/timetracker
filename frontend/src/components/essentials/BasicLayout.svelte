@@ -17,10 +17,7 @@
         <Navbar />
     {/if}
     <div class="content-container" bind:this={$content}>
-        <main
-            class="page-content container mx-auto px-4 pt-3 md:pt-6"
-            style={hideFooter ? "flex-basis: 100%" : ""}
-        >
+        <main class="page-content container mx-auto px-4 pt-3 md:pt-6" style={hideFooter ? "flex-basis: 100%" : ""}>
             <slot />
         </main>
         {#if footer}

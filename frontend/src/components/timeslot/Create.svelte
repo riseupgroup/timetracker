@@ -14,7 +14,7 @@
         start: Date | null;
         end: Date | null;
         comment: string | null;
-    }
+    };
 
     class NewTimeslotInputs {
         start: string = "";
@@ -30,7 +30,7 @@
                 start: this.start.trim().length > 0 ? new Date(this.start) : null,
                 end: this.end.trim().length > 0 ? new Date(this.end) : null,
                 comment: this.comment.trim().length > 0 ? this.comment : null
-            }
+            };
         }
     }
 
@@ -64,24 +64,12 @@
 <Modal bind:open={isOpen} size="xs" autoclose={false} class="w-full" outsideclose>
     <div class="flex flex-col space-y-6">
         <h3 class="mb-4 text-xl font-medium text-gray-900 dark:text-white">Create Timeslot</h3>
-        <InputTrash
-            name="Comment"
-            bind:value={newTimeslotInputs.comment}
-            type="text"
-            classBackground="bg-white dark:bg-gray-800"/>
-        
-        <InputTrash
-            name="Start"
-            bind:value={newTimeslotInputs.start}
-            type="datetime-local"
-            classBackground="bg-white dark:bg-gray-800"/>
+        <InputTrash name="Comment" bind:value={newTimeslotInputs.comment} type="text" classBackground="bg-white dark:bg-gray-800" />
 
-        <InputTrash
-            name="End"
-            bind:value={newTimeslotInputs.end}
-            type="datetime-local"
-            classBackground="bg-white dark:bg-gray-800" />
-        
+        <InputTrash name="Start" bind:value={newTimeslotInputs.start} type="datetime-local" classBackground="bg-white dark:bg-gray-800" />
+
+        <InputTrash name="End" bind:value={newTimeslotInputs.end} type="datetime-local" classBackground="bg-white dark:bg-gray-800" />
+
         <div class="flex justify-end space-x-2">
             <Button
                 on:click={() => {

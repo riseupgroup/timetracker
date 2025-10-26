@@ -25,13 +25,7 @@
 
     function onInput(e: KeyboardEvent) {
         if (type == "number") {
-            if (
-                e.key != "Backspace" &&
-                e.key != "Tab" &&
-                !e.key.startsWith("Arrow") &&
-                isNaN(parseInt(e.key))
-            )
-                e.preventDefault();
+            if (e.key != "Backspace" && e.key != "Tab" && !e.key.startsWith("Arrow") && isNaN(parseInt(e.key))) e.preventDefault();
         }
         if (value != lastValue) {
             if (changeTimeout != null) clearTimeout(changeTimeout);

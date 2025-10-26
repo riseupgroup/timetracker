@@ -32,23 +32,27 @@
         ["Date", "(New to Old)", "Date"],
         ["Date", "(Old to New)", "DateRev"],
         ["Name", "(A-Z)", "Name"],
-        ["Name", "(Z-A)", "NameRev"],
+        ["Name", "(Z-A)", "NameRev"]
     ];
 
     let fields: [string, (item: Tracker) => string, ((item: Tracker, mouseClick: MouseClick) => void) | null][] = [
         ["Name", (item) => item.name || "-", null],
-        ["TimePensum", (item) => {
-            if (item.timePensum) {
-                return formatDuration(item.timePensum * 60, true) + (item.timePensumUnit?" / " + item.timePensumUnit.toString():"");
-            } else if (item.timePensumUnit != TimePensumUnit[TimePensumUnit.None]) {
-                return item.timePensumUnit.toString();
-            } else {
-                return "None";
-            }
-        }, null],
-        ["ValidFrom", (item) => item.validFrom?new Date(item.validFrom).toLocaleString(browserLanguage):"-", null],
-        ["ValidUntil", (item) => item.validUntil?new Date(item.validUntil).toLocaleString(browserLanguage):"-", null],
-        ["Created", (item) => item.created?new Date(item.created).toLocaleString(browserLanguage):"-", null],
+        [
+            "TimePensum",
+            (item) => {
+                if (item.timePensum) {
+                    return formatDuration(item.timePensum * 60, true) + (item.timePensumUnit ? " / " + item.timePensumUnit.toString() : "");
+                } else if (item.timePensumUnit != TimePensumUnit[TimePensumUnit.None]) {
+                    return item.timePensumUnit.toString();
+                } else {
+                    return "None";
+                }
+            },
+            null
+        ],
+        ["ValidFrom", (item) => (item.validFrom ? new Date(item.validFrom).toLocaleString(browserLanguage) : "-"), null],
+        ["ValidUntil", (item) => (item.validUntil ? new Date(item.validUntil).toLocaleString(browserLanguage) : "-"), null],
+        ["Created", (item) => (item.created ? new Date(item.created).toLocaleString(browserLanguage) : "-"), null]
     ];
 
     let onRowClick = (item: Tracker, click: MouseClick) => {
@@ -57,19 +61,23 @@
 
     let actions: [string, (item: Tracker, click: MouseClick) => void][] = [
         ["Details", onRowClick],
-        ["Edit", (item, _click) => {
-            editTracker.edit(item);
-        }],
-        ["Delete", (item, _click) => {
-            deleteTracker = item;
-            isDeleteOpen = true;
-        }]
+        [
+            "Edit",
+            (item, _click) => {
+                editTracker.edit(item);
+            }
+        ],
+        [
+            "Delete",
+            (item, _click) => {
+                deleteTracker = item;
+                isDeleteOpen = true;
+            }
+        ]
     ];
 
     function itemSearch(x: Tracker, s: string): boolean {
-        return (
-            x.name?.toLowerCase().includes(s) || false
-        );
+        return x.name?.toLowerCase().includes(s) || false;
     }
 
     function itemCompare(a: Tracker, b: Tracker, order: string): number {
@@ -89,7 +97,6 @@
         }
         return 0;
     }
-
 </script>
 
 <SearchTable
@@ -105,46 +112,48 @@
     {itemSearch}
     {itemCompare}
 >
-    <Heading
-        tag="h1"
-        class="-ml-0.25 mb-2 text-4xl font-semibold text-gray-900 dark:text-gray-50"
-    >
+    <Heading tag="h1" class="-ml-0.25 mb-2 text-4xl font-semibold text-gray-900 dark:text-gray-50">
         Trackers <button
             class="cursor-pointer text-primary-600 hover:underline dark:text-primary-500"
             on:click={() => (isCreateOpen = true)}>+new</button
         >
     </Heading>
-    <span class="text-base font-normal text-gray-500 dark:text-gray-400">
-        This is a list of all standallone trackers
-    </span>
+    <span class="text-base font-normal text-gray-500 dark:text-gray-400"> This is a list of all standallone trackers </span>
 </SearchTable>
 
-<Delete bind:isOpen={isDeleteOpen} bind:entity={deleteTracker} on:deleted={(e) => {
-    trackersTable.manualUpdate((list) => {
-        list.items = list.items.filter(item => item.id != e.detail.id);
-        list.count--;
-        return list;
-    })
-}} />
+<Delete
+    bind:isOpen={isDeleteOpen}
+    bind:entity={deleteTracker}
+    on:deleted={(e) => {
+        trackersTable.manualUpdate((list) => {
+            list.items = list.items.filter((item) => item.id != e.detail.id);
+            list.count--;
+            return list;
+        });
+    }}
+/>
 
 <Create
     bind:isOpen={isCreateOpen}
     on:created={(e) => {
         trackersTable.manualUpdate((list) => {
             list.items.push(e.detail);
-            list.count++;;
+            list.count++;
             return list;
         });
     }}
 />
 
-<Edit bind:this={editTracker} on:update={(e) => {
-    trackersTable.manualUpdate((list) => {
-        let updatedTracker = e.detail;
-        let index = list.items.findIndex(item => item.id === updatedTracker.id);
-        if (index !== -1) {
-            list.items[index] = updatedTracker;
-        }
-        return list;
-    });
-}}/>
+<Edit
+    bind:this={editTracker}
+    on:update={(e) => {
+        trackersTable.manualUpdate((list) => {
+            let updatedTracker = e.detail;
+            let index = list.items.findIndex((item) => item.id === updatedTracker.id);
+            if (index !== -1) {
+                list.items[index] = updatedTracker;
+            }
+            return list;
+        });
+    }}
+/>

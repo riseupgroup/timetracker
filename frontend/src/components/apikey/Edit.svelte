@@ -61,39 +61,19 @@
 </script>
 
 {#if key != null}
-    <Modal
-        open={true}
-        on:close={() => (key = null)}
-        size="xs"
-        autoclose={false}
-        class="w-full"
-        outsideclose
-    >
+    <Modal open={true} on:close={() => (key = null)} size="xs" autoclose={false} class="w-full" outsideclose>
         <div class="flex flex-col space-y-6">
             <h3 class="mb-4 text-xl font-medium text-gray-900 dark:text-white">
-                Edit Key {originalKey != null ? (": " + originalKey.display()) : ""}
+                Edit Key{originalKey != null ? ": " + originalKey.display() : ""}
             </h3>
 
-            <InputTrash
-                name="Name"
-                bind:value={key.name}
-                classBackground="bg-white dark:bg-gray-800"
-            />
+            <InputTrash name="Name" bind:value={key.name} classBackground="bg-white dark:bg-gray-800" />
 
-            <InputTrash
-                name="Valid until"
-                bind:value={key.validUntil}
-                type="datetime-local"
-                classBackground="bg-white dark:bg-gray-800"
-            />
+            <InputTrash name="Valid until" bind:value={key.validUntil} type="datetime-local" classBackground="bg-white dark:bg-gray-800" />
 
-            <Toggle bind:checked={key.disabled} size="small" class="cursor-pointer">
-                Disabled
-            </Toggle>
+            <Toggle bind:checked={key.disabled} size="small" class="cursor-pointer">Disabled</Toggle>
 
-            <Toggle bind:checked={key.regenerate} size="small" class="cursor-pointer">
-                Regenerate
-            </Toggle>
+            <Toggle bind:checked={key.regenerate} size="small" class="cursor-pointer">Regenerate</Toggle>
 
             <div class="flex justify-end space-x-2">
                 <Button on:click={() => (key = null)} outline>Cancel</Button>
