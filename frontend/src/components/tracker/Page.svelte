@@ -471,6 +471,16 @@
         <Heading tag="h1" class="text-2xl">
             {tracker.display()}
         </Heading>
+            {#if tracker.job != null}
+                <button class="cursor-pointer hover:underline" on:click={(mouseEvent) => {
+                    mouseEvent.preventDefault();
+                    if (tracker && tracker.job) {
+                        new MouseClick(mouseEvent).goto("/jobs/" + tracker.job);
+                    }
+                }}>
+                    Go back to job
+                </button>
+            {/if}
         <hr class="mb-4 mt-4" />
         Added on {new Date(tracker.created).toLocaleString(browserLanguage, { year: "numeric", month: "short", day: "numeric" })} at {new Date(tracker.created).toLocaleTimeString(browserLanguage)}
     </SmallCard>
