@@ -227,6 +227,7 @@
     />
 
     <Create
+        job={job.id}
         bind:isOpen={isCreateTrackerOpen}
         on:created={(e) => {
             trackersTable.manualUpdate((list) => {
