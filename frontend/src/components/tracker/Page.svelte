@@ -359,7 +359,7 @@
             (t) => {
                 if (t.comment == null) return "-";
                 let comment = t.comment.trim();
-                comment = comment.replace(/\n/g, " ").trim();
+                comment = comment.replace(/\n/g, ", ").trim();
                 if (comment.length > 50) {
                     return comment.substring(0, 47).trim() + "...";
                 }
