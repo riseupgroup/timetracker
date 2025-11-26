@@ -4,6 +4,7 @@
     import InputTrash from "../InputTrash.svelte";
     import { createEventDispatcher } from "svelte";
     import { getLocalTimestamp, Timeslot } from "../../app";
+    import TextArea from "../TextArea.svelte";
 
     const dispatch = createEventDispatcher();
 
@@ -64,7 +65,8 @@
 <Modal bind:open={isOpen} size="xs" autoclose={false} class="w-full" outsideclose>
     <div class="flex flex-col space-y-6">
         <h3 class="mb-4 text-xl font-medium text-gray-900 dark:text-white">Create Timeslot</h3>
-        <InputTrash name="Comment" bind:value={newTimeslotInputs.comment} type="text" classBackground="bg-white dark:bg-gray-800" />
+
+        <TextArea bind:text={newTimeslotInputs.comment} placeholder="Leave a comment">Comment</TextArea>
 
         <InputTrash name="Start" bind:value={newTimeslotInputs.start} type="datetime-local" classBackground="bg-white dark:bg-gray-800" />
 
