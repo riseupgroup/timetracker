@@ -229,3 +229,15 @@ where
         })
     }
 }
+
+pub fn empty_string_is_set_none<'de, D>(deserializer: D) -> Result<UpdateOption<String>, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    let s = match UpdateOption::<String>::deserialize(deserializer)? {
+        UpdateOption::Set(Some(s)) if s.is_empty() => UpdateOption::Set(None),
+        s => s,
+    };
+
+    Ok(s)
+}
