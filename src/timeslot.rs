@@ -4,7 +4,7 @@ use {
         entities::{prelude::*, *},
         error::{MapToErr, ToErr},
         tracker::{DisplayRange, ExtendedTracker},
-        update_value::{UpdateOption, UpdateValue},
+        update_value::{empty_string_is_set_none, UpdateOption, UpdateValue},
         AppData,
     },
     actix_web::{
@@ -18,7 +18,7 @@ use {
         prelude::DateTimeUtc, ActiveModelTrait, ColumnTrait, EntityTrait, IntoActiveModel,
         IntoSimpleExpr, ModelTrait, QueryFilter, QueryOrder, QuerySelect, Set, TransactionTrait,
     },
-    serde::{Deserialize, Serialize},
+    serde::{Deserialize, Deserializer, Serialize},
     serde_inline_default::serde_inline_default,
     std::cmp::Ordering,
     tracker::TimePensumUnit,
@@ -33,7 +33,7 @@ pub struct UpdateTimeslot {
     start: UpdateValue<DateTimeUtc>,
     #[serde(default)]
     end: UpdateOption<DateTimeUtc>,
-    #[serde(default)]
+    #[serde(default, deserialize_with = "empty_string_is_set_none")]
     comment: UpdateOption<String>,
 }
 
@@ -219,7 +219,20 @@ pub struct NewTimeslot {
     #[serde(default = "Utc::now")]
     start: DateTimeUtc,
     end: Option<DateTimeUtc>,
+    #[serde(deserialize_with = "empty_string_is_none")]
     comment: Option<String>,
+}
+
+fn empty_string_is_none<'de, D>(deserializer: D) -> Result<Option<String>, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    let s = match Option::<String>::deserialize(deserializer)? {
+        Some(s) if s.is_empty() => None,
+        s => s,
+    };
+
+    Ok(s)
 }
 
 impl NewTimeslot {
